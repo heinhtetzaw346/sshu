@@ -1,6 +1,6 @@
 [project]
 name = "sshu"
-version = "0.1.0"
+version = "v0.1.0"
 description = "An ssh utility tool to manage ssh connections and keys"
 authors = [
     {name = "Hein Htet Zaw",email = "h3inhtetzaw346@gmail.com"}
