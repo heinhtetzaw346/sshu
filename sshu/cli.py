@@ -1,7 +1,8 @@
 import typer
 import importlib.metadata
-from conn import manager as connmanager
-from keys import manager as keysmanager
+from pathlib import Path
+from sshu.conn import manager as connmanager
+from sshu.keys import manager as keysmanager
 
 app = typer.Typer(help = "Manage SSH connections and keys",add_completion=False)
 app.add_typer(keysmanager.app, name="keys", help="Manage SSH keys")
@@ -11,12 +12,47 @@ try:
 except importlib.metadata.PackageNotFoundError:
     __version__ = "v0.1.0"
 
+home_dir = Path.home()
+ssh_dir = home_dir / ".ssh"
+ssh_cfg = ssh_dir / "config"
+ssh_cfg_bk = ssh_dir / "config.og.bk"
+sshu_marker = "#### Managed by SSHU ####"
+
+def initialize_ssh_config():
+    if not ssh_dir.exists():
+        ssh_dir.mkdir(mode=0o700)
+        typer.echo("Created ssh directory because it doesn't exist yet")
+    if not ssh_cfg.exists():
+        ssh_cfg.touch(mode=0o600)
+        typer.echo("Created ssh/config file because it doesn't exist yet")
+    elif not ssh_cfg_bk.exists():
+        typer.echo("Backing up the ssh config file before editing it")
+        ssh_cfg_bk.write_text(ssh_cfg.read_text())
+    
+    ssh_cfg_contents = ssh_cfg.read_text().splitlines()
+
+    if sshu_marker not in ssh_cfg_contents:
+        ssh_cfg_contents.append("\n")
+        ssh_cfg_contents.append(sshu_marker)
+        ssh_cfg.write_text("\n".join(ssh_cfg_contents) + "\n")
+
+def main():
+    initialize_ssh_config()
+    app()
+
+
 @app.command()
 def ls():
     """
     show available ssh connections and their status
+    
+    Host\t -> Name of the connection\n
+    HostName\t -> Server address (IP or Hostname)\n
+    User\t -> SSH User\n
+    IdentityFile -> SSH Private Key\n
+    Keyed\t -> Whether ssh-copy-id is performed (only present on connections managed by sshu)\n
+
     """
-    print("use this to list ssh connections")
     connmanager.list()
 
 @app.command()
@@ -49,7 +85,7 @@ def rm():
     """
     remove ssh connections
     """
-    print("use this to remove ssh connections")
+    typer.echo("use this to remove ssh connections")
     connmanager.remove()
 
 @app.command()
@@ -57,10 +93,7 @@ def version():
     """
     show the current app version
     """
-    print(__version__)
-
-def main():
-    app()
+    typer.echo(__version__)
 
 if __name__ == "__main__":
     main()
