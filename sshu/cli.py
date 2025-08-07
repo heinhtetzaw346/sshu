@@ -50,6 +50,7 @@ def ls():
     HostName\t -> Server address (IP or Hostname)\n
     User\t -> SSH User\n
     IdentityFile -> SSH Private Key\n
+    Port\t -> SSH Port\n
     Keyed\t -> Whether ssh-copy-id is performed (only present on connections managed by sshu)\n
 
     """
@@ -61,7 +62,8 @@ def add(
     conn_name: str = typer.Argument(..., help="SSH connection name to save eg. server1"),
     passwd: bool = typer.Option(False, "--passwd", help="use password authentication"),
     copyid: bool = typer.Option(False, "--copyid", help="perform ssh-copy-id to the remote server"),
-    keypair: str = typer.Option(None, "--keypair", help="use keypair authentication and provide a private key")
+    keypair: str = typer.Option(None, "--keypair", help="use keypair authentication and provide a private key"),
+    port: str = typer.Option(22, help="SSH connection port; default is 22")
 ):
     """
     add new ssh connections
@@ -78,7 +80,7 @@ def add(
         typer.echo("--keypair and --copyid can't be used together",err=True)
         raise typer.Exit(code=1)
 
-    connmanager.add(address_string,conn_name,passwd,copyid,keypair)
+    connmanager.add(address_string,conn_name,passwd,copyid,keypair, port)
 
 @app.command()
 def rm():

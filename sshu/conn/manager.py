@@ -8,18 +8,19 @@ home_dir = Path.home()
 ssh_dir = home_dir / ".ssh"
 ssh_cfg = ssh_dir / "config"
 
-def add(address_string: str, conn_name: str, passwd: bool, copyid: bool, keypair: str):
+def add(address_string: str, conn_name: str, passwd: bool, copyid: bool, keypair: str, port: str):
     if passwd:
         user_and_hostname = address_string.split('@')
         user = user_and_hostname[0]
         hostname = user_and_hostname[1]
         
-        host_cfg = f"Host {conn_name}\n  HostName {hostname}\n  User {user}\n"
+        host_cfg = f"Host {conn_name}\n  HostName {hostname}\n  User {user}\n  Port {port}\n"
         ssh_cfg_string = ssh_cfg.read_text()
         ssh_cfg_content = ssh_cfg.read_text().splitlines()
 
         if copyid:
             typer.echo(f"copying public key to server {address_string} for connection {conn_name}")
+            
             host_cfg = host_cfg + "  #Keyed yes\n"
         else:
             host_cfg = host_cfg + "  #Keyed no\n"
