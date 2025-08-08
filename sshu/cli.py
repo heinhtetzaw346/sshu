@@ -1,5 +1,7 @@
 import typer
 import importlib.metadata
+import os
+import subprocess
 from pathlib import Path
 from sshu.conn import manager as connmanager
 from sshu.keys import manager as keysmanager
@@ -17,6 +19,10 @@ ssh_dir = home_dir / ".ssh"
 ssh_cfg = ssh_dir / "config"
 ssh_cfg_bk = ssh_dir / "config.og.bk"
 sshu_marker = "#### Managed by SSHU ####"
+
+def main():
+    initialize_ssh_config()
+    app()
 
 def initialize_ssh_config():
     if not ssh_dir.exists():
@@ -36,10 +42,19 @@ def initialize_ssh_config():
         ssh_cfg_contents.append(sshu_marker)
         ssh_cfg.write_text("\n".join(ssh_cfg_contents) + "\n")
 
-def main():
-    initialize_ssh_config()
-    app()
-
+def initialize_ssh_keys():
+   ssh_dir_contents = os.listdir(ssh_dir)
+   if not "id_ed25519.pub" in ssh_dir_contents:
+       print("Creating an ed25519 key because it doesn't exist yet")
+       process = subprocess.Popen(
+           ["ssh-keygen", "-t", "ed25519"],
+           stdin=subprocess.PIPE,
+           stdout=subprocess.PIPE,
+           stderr=subprocess.PIPE,
+           text=True
+       ) 
+       output = process.communicate(input="\n\n\n")
+       print(output[0])
 
 @app.command()
 def ls():
@@ -68,6 +83,8 @@ def add(
     """
     add new ssh connections
     """
+    initialize_ssh_keys()
+
     if passwd and keypair:
         typer.echo("You can't use both --passwd and --keypair please use only one authentication option", err=True)
         raise typer.Exit(code=1)
