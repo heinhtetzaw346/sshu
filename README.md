@@ -21,7 +21,7 @@ Download the binary from the releases.
 Move it to a local binary directory.
 
 ```
-sudo mv sshu /usr/local/sshu
+sudo mv sshu /usr/local/bin/
 ```
 You can now start running sshu commands.
 
