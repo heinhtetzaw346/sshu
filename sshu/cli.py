@@ -100,12 +100,15 @@ def add(
     connmanager.add(address_string,conn_name,passwd,copyid,keypair, port)
 
 @app.command()
-def rm():
+def rm(
+    conn_name: str = typer.Argument(None,help="SSH connection name to remove"),
+    all: bool = typer.Option(False,"--all", help="Remove all ssh connections. This will restore the ssh config file to the state before sshu was used")
+):
     """
     remove ssh connections
     """
     typer.echo("use this to remove ssh connections")
-    connmanager.remove()
+    connmanager.remove(conn_name, all)
 
 @app.command()
 def version():
