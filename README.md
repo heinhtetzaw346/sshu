@@ -1,6 +1,6 @@
 # SSH Utility
 
-python cli app made with typer that
+python cli app made with typer that manages ssh connections interactively with commands. Saves time from manually editing the ssh config file and easily connect to remote host with simple names.
 
 ## Commands
 
