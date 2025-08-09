@@ -1,6 +1,8 @@
 import typer
 import importlib.metadata
 import os
+import logging
+import appdirs
 import subprocess
 from pathlib import Path
 from sshu.conn import manager as connmanager
@@ -20,10 +22,43 @@ ssh_cfg = ssh_dir / "config"
 ssh_cfg_bk = ssh_dir / "config.og.bk"
 sshu_marker = "#### Managed by SSHU ####"
 
-def main():
-    app()
+@app.callback()
+def main(verbose: int = typer.Option(0, "-v", count=True)):
+    if verbose == 0:
+        stdout_level = logging.CRITICAL
+    elif verbose == 1:
+        stdout_level = logging.INFO
+    else:
+        stdout_level = logging.DEBUG
+    
+    configure_logging(stdout_level)
+
+def configure_logging(stdout_level=logging.CRITICAL):
+
+    log_dir = appdirs.user_data_dir("sshu", "FuReAsu")
+    os.makedirs(log_dir, exist_ok=True)
+    log_file = os.path.join(log_dir, "sshu.log")
+    
+    logger = logging.getLogger()
+    logger.setLevel(logging.DEBUG)
+
+    file_handler = logging.FileHandler(log_file)
+    file_handler.setLevel(logging.DEBUG)
+    file_format = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    file_handler.setFormatter(file_format)
+
+    stdout_handler = logging.StreamHandler()
+    stdout_handler.setLevel(stdout_level)
+    stdout_format = logging.Formatter("%(levelname)s: %(message)s")
+    stdout_handler.setFormatter(stdout_format)
+
+    logger.addHandler(file_handler)
+    logger.addHandler(stdout_handler)
+
+    return logger
 
 def initialize_ssh_config():
+
     if not ssh_dir.exists():
         ssh_dir.mkdir(mode=0o700)
         typer.echo("Created ssh directory because it doesn't exist yet")
@@ -42,6 +77,7 @@ def initialize_ssh_config():
         ssh_cfg.write_text("\n".join(ssh_cfg_contents) + "\n")
 
 def initialize_ssh_keys():
+
    ssh_dir_contents = os.listdir(ssh_dir)
    if not "id_ed25519.pub" in ssh_dir_contents:
        print("Creating an ed25519 key because it doesn't exist yet")
@@ -117,4 +153,4 @@ def version():
     typer.echo(__version__)
 
 if __name__ == "__main__":
-    main()
+    app()
