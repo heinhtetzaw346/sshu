@@ -21,7 +21,6 @@ ssh_cfg_bk = ssh_dir / "config.og.bk"
 sshu_marker = "#### Managed by SSHU ####"
 
 def main():
-    initialize_ssh_config()
     app()
 
 def initialize_ssh_config():
@@ -83,6 +82,7 @@ def add(
     """
     add new ssh connections
     """
+    initialize_ssh_config()
     initialize_ssh_keys()
 
     if passwd and keypair:
@@ -107,7 +107,6 @@ def rm(
     """
     remove ssh connections
     """
-    typer.echo("use this to remove ssh connections")
     connmanager.remove(conn_name, all)
 
 @app.command()
