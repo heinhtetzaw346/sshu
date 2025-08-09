@@ -16,7 +16,13 @@ In current beta version v0.1.0, only Linux is supported. I will try to make it w
 
 ## How to use
 
-Download the binary from the releases.
+Download the tar file from the releases.
+
+Extract it
+
+```
+tar -xzvf sshu-beta-v0.1.0.tar.gz
+```
 
 Move it to a local binary directory.
 
@@ -46,4 +52,3 @@ Below are what I used in sshu:
 - Typer for cli app
 - Fabric for remote command execution over ssh connection
 
-    
