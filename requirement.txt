@@ -1,0 +1,4 @@
+Typer
+fabric
+appdirs
+pyinstaller
