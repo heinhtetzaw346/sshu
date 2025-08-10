@@ -52,3 +52,45 @@ Below are what I used in sshu:
 - Typer for cli app
 - Fabric for remote command execution over ssh connection
 
+## Build it yourself
+
+
+Clone the repo 
+``````
+git clone https://github.com/FuReAsu/sshu.git && cd sshu
+``````
+<br/>
+
+**Natively on your system**
+
+Install dependencies
+
+```
+pip install -r requirement.txt
+```
+
+Run pyinstaller
+
+```
+pyinstaller --name sshu --distpath ./dist -p ./sshu --onefile ./sshu/cli.py 
+```
+
+The resulting binary will be in the ./dist directory.
+<br/>
+<br/>
+
+**With Docker**
+
+You can edit the Dockerfile to fit your needs if you want but. It's ready to run.
+
+```
+docker build -t local/sshu-build:latest .
+```
+
+Run container to build image
+
+```
+docker run --rm -it -v ./dist:/dist local/sshu-build:latest
+```
+
+The resulting binary will be in the ./dist directory.
