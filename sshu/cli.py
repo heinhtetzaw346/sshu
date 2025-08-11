@@ -14,7 +14,7 @@ app.add_typer(keysmanager.app, name="keys", help="Manage SSH keys")
 try:
     __version__ = importlib.metadata.version("sshu")
 except importlib.metadata.PackageNotFoundError:
-    __version__ = "v0.1.0"
+    __version__ = "0.1.1"
 
 home_dir = Path.home()
 ssh_dir = home_dir / ".ssh"

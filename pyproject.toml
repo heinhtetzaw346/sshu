@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sshu"
-version = "0.1.0"  # remove leading 'v'
+version = "0.1.1"  
 description = "An ssh utility tool to manage ssh connections and keys"
 authors = ["Hein Htet Zaw <h3inhtetzaw346@gmail.com>"]
 packages = [{include = "sshu"}]
