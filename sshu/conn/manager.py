@@ -259,8 +259,7 @@ def remove_pubkey_from_remote(conn_name:str, ssh_cfg_content, retries):
 
             remote_authorized_keys_content = remote_authorized_keys.stdout.strip()
             remote_authorized_keys_content = remote_authorized_keys_content.replace(pubkey,"")
-            
-            update_authorized_keys = conn.run(f"echo '{pubkey}' > $HOME/.ssh/authorized_keys", hide=True, warn=True)
+            update_authorized_keys = conn.run(f"echo '{remote_authorized_keys_content}' > $HOME/.ssh/authorized_keys", hide=True, warn=True)
 
             if update_authorized_keys.return_code != 0:
                 typer.secho("Removing the pubkey from the remote host failed, aborting the remove action...", fg=typer.colors.BRIGHT_RED)
