@@ -137,12 +137,13 @@ def add(
 @app.command()
 def rm(
     conn_name: str = typer.Argument(None,help="SSH connection name to remove"),
-    all: bool = typer.Option(False,"--all", help="Remove all ssh connections. This will restore the ssh config file to the state before sshu was used")
+    all: bool = typer.Option(False,"--all", help="Remove all ssh connections. This will restore the ssh config file to the state before sshu was used"),
+    remote: bool = typer.Option(False, "--remote", help="Remove the public key from the remote server. This can only be done for connections with Keyed=yes")
 ):
     """
     remove ssh connections
     """
-    connmanager.remove(conn_name, all)
+    connmanager.remove(conn_name, all, remote)
 
 @app.command()
 def version():
