@@ -14,6 +14,12 @@ python cli app made with typer that manages ssh connections interactively with c
 In current beta version v0.1.0, only Linux is supported. I will try to make it work on all major OS types.
 
 
+## Releases
+
+You can find all official releases on the [Releases page](../../releases).
+
+The [`dist/`](./dist) directory contains the latest development build/binary.
+
 ## How to use
 
 Download the tar file from the releases.
