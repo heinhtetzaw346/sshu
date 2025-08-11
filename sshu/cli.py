@@ -19,7 +19,6 @@ except importlib.metadata.PackageNotFoundError:
 home_dir = Path.home()
 ssh_dir = home_dir / ".ssh"
 ssh_cfg = ssh_dir / "config"
-ssh_cfg_bk = ssh_dir / "config.og.bk"
 sshu_marker = "#### Managed by SSHU ####"
 
 @app.callback()
@@ -32,6 +31,8 @@ def main(verbose: int = typer.Option(0, "-v", count=True)):
         stdout_level = logging.DEBUG
     
     configure_logging(stdout_level)
+    initialize_ssh_config()
+    initialize_ssh_keys()
 
 def configure_logging(stdout_level=logging.CRITICAL):
 
@@ -58,16 +59,16 @@ def configure_logging(stdout_level=logging.CRITICAL):
     return logger
 
 def initialize_ssh_config():
+    
+    logging.info(f"Initializing ssh directory and its contents at {ssh_dir}...")
 
     if not ssh_dir.exists():
         ssh_dir.mkdir(mode=0o700)
-        typer.echo("Created ssh directory because it doesn't exist yet")
+        logging.debug(f"Created {ssh_dir} with permission 700")
+
     if not ssh_cfg.exists():
         ssh_cfg.touch(mode=0o600)
-        typer.echo("Created ssh/config file because it doesn't exist yet")
-    elif not ssh_cfg_bk.exists():
-        typer.echo("Backing up the ssh config file before editing it")
-        ssh_cfg_bk.write_text(ssh_cfg.read_text())
+        logging.debug(f"Created {ssh_cfg} with permission 600")
     
     ssh_cfg_contents = ssh_cfg.read_text().splitlines()
 
@@ -75,21 +76,21 @@ def initialize_ssh_config():
         ssh_cfg_contents.append("\n")
         ssh_cfg_contents.append(sshu_marker)
         ssh_cfg.write_text("\n".join(ssh_cfg_contents) + "\n")
+        logging.debug(f"Added '{sshu_marker}' to {ssh_cfg}")
 
 def initialize_ssh_keys():
 
    ssh_dir_contents = os.listdir(ssh_dir)
    if not "id_ed25519.pub" in ssh_dir_contents:
-       print("Creating an ed25519 key because it doesn't exist yet")
        process = subprocess.Popen(
-           ["ssh-keygen", "-t", "ed25519"],
+           ["ssh-keygen", "-t", "ed25519", "-f", f"{home_dir}/.ssh/id_ed25519", "-N", ""],
            stdin=subprocess.PIPE,
            stdout=subprocess.PIPE,
            stderr=subprocess.PIPE,
            text=True
        ) 
        output = process.communicate(input="\n\n\n")
-       print(output[0])
+       logging.debug(f"pubkey generation output -> {output}")
 
 @app.command()
 def ls():
@@ -118,8 +119,6 @@ def add(
     """
     add new ssh connections
     """
-    initialize_ssh_config()
-    initialize_ssh_keys()
 
     if passwd and keypair:
         typer.echo("You can't use both --passwd and --keypair please use only one authentication option", err=True)

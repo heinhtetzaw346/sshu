@@ -53,7 +53,7 @@ def add(address_string: str, conn_name: str, passwd: bool, copyid: bool, keypair
                     typer.echo("Creating authorized_keys file failed")
                     typer.echo(f"Remote STDOUT: {create_authorized_keys.stdout.strip()}\n\nremote STDERR: {create_authorized_keys.stderr.strip()} ")
 
-            check_pub_key_exists = conn.run(f"cat $HOME/.ssh/authorized_keys | grep '{pubkey}'", warn=True, hide=True)
+            check_pub_key_exists = conn.run(f'cat $HOME/.ssh/authorized_keys | grep "{pubkey}"', warn=True, hide=True)
             if check_pub_key_exists.return_code != 0:
                 insert_pub_key = conn.run(f"echo '{pubkey}' >> $HOME/.ssh/authorized_keys", warn=True) 
                 if insert_pub_key.return_code != 0:
@@ -147,7 +147,7 @@ def remove(conn_name: str, all: bool):
     elif conn_name:
         host_block_to_delete = []
         if not conn_name_exists(conn_name):
-            typer.echo("No ssh connection named {conn_name} exists...")
+            typer.echo(f"No ssh connection named {conn_name} exists...")
             exit()
         else:
             conn_name_index = ssh_cfg_content.index("Host " + conn_name)

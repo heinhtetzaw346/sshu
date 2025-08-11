@@ -1,23 +1,18 @@
-[project]
-name = "sshu"
-version = "v0.1.0"
-description = "An ssh utility tool to manage ssh connections and keys"
-authors = [
-    {name = "Hein Htet Zaw",email = "h3inhtetzaw346@gmail.com"}
-]
-readme = "README.md"
-requires-python = ">=3.12"
-dependencies = [
-    "typer (>=0.16.0,<0.17.0)",
-    "fabric (>=3.2.2,<4.0.0)",
-    "appdirs (>=1.4.4,<2.0.0)"
-]
-
 [tool.poetry]
+name = "sshu"
+version = "0.1.0"  # remove leading 'v'
+description = "An ssh utility tool to manage ssh connections and keys"
+authors = ["Hein Htet Zaw <h3inhtetzaw346@gmail.com>"]
 packages = [{include = "sshu"}]
 
 [tool.poetry.scripts]
 sshu = "sshu.cli:app"
+
+[tool.poetry.dependencies]
+python = ">=3.12"
+typer = ">=0.16.0,<0.17.0"
+fabric = ">=3.2.2,<4.0.0"
+appdirs = ">=1.4.4,<2.0.0"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
