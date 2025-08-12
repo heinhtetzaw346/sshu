@@ -22,7 +22,7 @@ ssh_cfg = ssh_dir / "config"
 sshu_marker = "#### Managed by SSHU ####"
 
 @app.callback()
-def main(verbose: int = typer.Option(0, "-v", count=True)):
+def main(verbose: int = typer.Option(0, "--verbose", "-v", count=True)):
     if verbose == 0:
         stdout_level = logging.CRITICAL
     elif verbose == 1:
@@ -111,10 +111,10 @@ def ls():
 def add(
     address_string: str = typer.Argument(..., help="SSH address string to the remote server eg. user@server.com"),
     conn_name: str = typer.Argument(..., help="SSH connection name to save eg. server1"),
-    passwd: bool = typer.Option(False, "--passwd", help="use password authentication"),
-    copyid: bool = typer.Option(False, "--copyid", help="perform ssh-copy-id to the remote server"),
-    keypair: str = typer.Option(None, "--keypair", help="use keypair authentication and provide a private key"),
-    port: str = typer.Option(22, help="SSH connection port; default is 22")
+    passwd: bool = typer.Option(False, "--passwd", "-P", help="use password authentication"),
+    copyid: bool = typer.Option(False, "--copyid", "-c", help="perform ssh-copy-id to the remote server"),
+    keypair: str = typer.Option(None, "--keypair", "-k", help="use keypair authentication and provide a private key"),
+    port: str = typer.Option(22, "--port", "-p", help="SSH connection port; default is 22")
 ):
     """
     add new ssh connections
@@ -137,8 +137,8 @@ def add(
 @app.command()
 def rm(
     conn_name: str = typer.Argument(None,help="SSH connection name to remove"),
-    all: bool = typer.Option(False,"--all", help="Remove all ssh connections. This will restore the ssh config file to the state before sshu was used"),
-    remote: bool = typer.Option(False, "--remote", help="Remove the public key from the remote server. This can only be done for connections with Keyed=yes")
+    all: bool = typer.Option(False,"--all", "-A", help="Remove all ssh connections. This will restore the ssh config file to the state before sshu was used"),
+    remote: bool = typer.Option(False, "--remote", "-r", help="Remove the public key from the remote server. This can only be done for connections with Keyed=yes")
 ):
     """
     remove ssh connections
