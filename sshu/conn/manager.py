@@ -161,6 +161,7 @@ def remove(conn_name: str, all: bool, remote: bool):
             sys.exit()
         if remote:
             remove_pubkey_from_remote(conn_name, ssh_cfg_content, retries=3)
+
         remove_conn_from_cfg(conn_name,ssh_cfg_content)
         typer.echo(f"Deleted ssh connection {conn_name}")
 
@@ -250,21 +251,22 @@ def remove_pubkey_from_remote(conn_name:str, ssh_cfg_content, retries):
         )
 
         try:
-            remote_authorized_keys = conn.run(f"cat $HOME/.ssh/authorized_keys", hide=True, warn=True)
+            get_authorized_keys = conn.run(f"cat $HOME/.ssh/authorized_keys", hide=True , warn=True)
 
-            if remote_authorized_keys.return_code != 0:
+            if get_authorized_keys.return_code != 0:
                 typer.secho("Getting the authorized_keys file on remote host failed...", fg=typer.colors.BRIGHT_RED)
-                typer.secho(f"ERROR - {remote_authorized_keys.stderr.strip()}", fg=typer.colors.BRIGHT_RED)
+                typer.secho(f"ERROR - {get_authorized_keys.stderr.strip()}", fg=typer.colors.BRIGHT_RED)
                 sys.exit()
 
-            remote_authorized_keys_content = remote_authorized_keys.stdout.strip()
-            remote_authorized_keys_content = remote_authorized_keys_content.replace(pubkey,"")
-            update_authorized_keys = conn.run(f"echo '{remote_authorized_keys_content}' > $HOME/.ssh/authorized_keys", hide=True, warn=True)
+            remote_authorized_keys = get_authorized_keys.stdout
+            remote_authorized_keys = remote_authorized_keys.replace(pubkey,"").strip()
+            update_authorized_keys = conn.run(f"echo '{remote_authorized_keys}' > $HOME/.ssh/authorized_keys", hide=True, warn=True)
 
             if update_authorized_keys.return_code != 0:
                 typer.secho("Removing the pubkey from the remote host failed, aborting the remove action...", fg=typer.colors.BRIGHT_RED)
                 typer.secho(f"ERROR - {update_authorized_keys.stderr.strip()}", fg=typer.colors.BRIGHT_RED)
                 sys.exit()
+            typer.echo(f"Public key successfully deleted from {host_info["HostName"]}")
 
         except Exception as e:
             typer.secho(f"Error: {type(e).__name__} – {e}", fg=typer.colors.BRIGHT_RED)
