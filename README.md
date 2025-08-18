@@ -27,7 +27,7 @@ The [`dist/`](./dist) directory contains the latest development build/binary.
 Run the following command
 
 ```
-curl -L https://raw.githubusercontent.com/FuReAsu/sshu/refs/heads/main/install/sshu-installer.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/FuReAsu/sshu/refs/heads/main/install/sshu-installer.sh | sudo bash
 ```
 Currently, this script is only usable for Debian-like distros, RedHat-like distros and SUSE distros.
 
