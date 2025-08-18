@@ -121,15 +121,15 @@ def add(
     """
 
     if passwd and keypair:
-        typer.echo("You can't use both --passwd and --keypair please use only one authentication option", err=True)
+        typer.secho("You can't use both --passwd and --keypair please use only one authentication option", fg=typer.colors.BRIGHT_RED, err=True)
         raise typer.Exit(code=1)
 
     if not passwd and not keypair:
-        typer.echo("Please choose at least one authenticaiton option --passwd or --keypair", err=True)
+        typer.secho("Please choose at least one authenticaiton option --passwd or --keypair", fg=typer.colors.BRIGHT_RED, err=True)
         raise typer.Exit(code=1)
 
     if keypair and copyid:
-        typer.echo("--keypair and --copyid can't be used together",err=True)
+        typer.secho("--keypair and --copyid can't be used together", fg=typer.colors.BRIGHT_RED, err=True)
         raise typer.Exit(code=1)
 
     connmanager.add(address_string,conn_name,passwd,copyid,keypair, port)

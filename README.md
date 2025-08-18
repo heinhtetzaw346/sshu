@@ -22,6 +22,19 @@ The [`dist/`](./dist) directory contains the latest development build/binary.
 
 ## How to use
 
+### Use the installation script.
+
+Run the following command
+
+```
+curl -L https://raw.githubusercontent.com/FuReAsu/sshu/refs/heads/main/install/sshu-installer.sh | sudo bash
+```
+Currently, this script is only usable for Debian-like distros, RedHat-like distros and SUSE distros.
+
+
+
+### Install it yourself
+
 Download the tar file from the releases.
 
 Extract it
