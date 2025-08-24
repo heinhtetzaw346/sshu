@@ -27,9 +27,9 @@ The [`dist/`](./dist) directory contains the latest development build/binary.
 Run the following command
 
 ```
-curl -fsSL https://raw.githubusercontent.com/FuReAsu/sshu/refs/heads/main/install/sshu-installer.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/FuReAsu/sshu/refs/heads/main/install/linux_bash/sshu-installer.sh | sudo bash
 ```
-Currently, this script is only usable for Debian-like distros, RedHat-like distros and SUSE distros.
+Currently, this script is only usable for Debian-like distros, RedHat-like distros and SUSE distros and using bash-like shell.
 
 
 
@@ -40,7 +40,7 @@ Download the tar file from the releases.
 Extract it
 
 ```
-tar -xzvf sshu-beta-v0.1.0.tar.gz
+tar -xzvf sshu-beta-v0.1.1.tar.gz
 ```
 
 Move it to a local binary directory.
@@ -73,6 +73,7 @@ Below are what I used in sshu:
 
 ## Build it yourself
 
+Building it yourself is quick and easy, only taking upwards of 3 minutes. The best part is it is guaranteed to work.
 
 Clone the repo 
 ``````
@@ -100,16 +101,20 @@ The resulting binary will be in the ./dist directory.
 
 **With Docker**
 
+There are different dockerfiles for different build configurations in the [build](build) directory.
+
+Use glibc dockerfile for mainstream distros using glibc like most Debian-like and RedHat-like. Use musl dockerfile for distros that use musl like Alpine.
+
 You can edit the Dockerfile to fit your needs if you want but. It's ready to run.
 
 ```
-docker build -t local/sshu-build:latest .
+docker build -t local/sshu-build:latest -f build/Dockerfile.linux_glibc .
 ```
 
-Run container to build image
+Run container to build image. Specifiy the correct ./dist sub dir.
 
 ```
-docker run --rm -it -v ./dist:/dist local/sshu-build:latest
+docker run --rm -it -v ./dist/linux_glibc:/dist local/sshu-build:latest
 ```
 
-The resulting binary will be in the ./dist directory.
+The resulting binary will be in the ./dist directory in the dir you specified.
