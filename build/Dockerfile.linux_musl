@@ -1,0 +1,19 @@
+FROM python:3.12-alpine3.22
+
+COPY ./requirement.txt /tmp/requirement.txt
+
+RUN pip install -r /tmp/requirement.txt
+
+RUN apk add binutils
+
+RUN mkdir /dist
+
+RUN mkdir sshu
+
+COPY ./sshu sshu
+
+ENTRYPOINT ["pyinstaller"]
+
+CMD ["--name", "sshu", "--distpath", "/dist", "--onefile", "sshu/cli.py"]
+
+VOLUME /dist
