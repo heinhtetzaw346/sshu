@@ -8,7 +8,24 @@ from pathlib import Path
 from sshu.conn import manager as connmanager
 from sshu.keys import manager as keysmanager
 
-app = typer.Typer(help = "Manage SSH connections and keys",add_completion=False)
+help_message = """  Manage SSH connections and keys\n
+                    Examples\n
+                    sshu add --passwd --copyid sysadmin@192.168.1.25 db_server\n
+                    sshu add --keypair ~/.ssh/Web_Server_Key.pem sysadmin@192.168.1.50 web_server\n
+                    sshu ls\n
+                    sshu rm web_server\n
+                    sshu rm --remote db_server\n
+                    \n
+                    You can also use short forms of the options\n
+                    sshu add -P -c sysadmin@192.168.1.25 db_server\n
+                    sshu add -k ~/.ssh/Web_Server_Key.pem sysadmin@192.168.1.50 web_server\n
+                    sshu rm -r db_server\n
+                    \n
+                    You can also specify ports for non default ssh ports by using --port or -p\n
+                    sshu add --port 8282 --keypair ~/.ssh/Web_Server_Key.pem sysadmin@192.168.1.50 web_server
+               """
+
+app = typer.Typer(help = help_message,add_completion=False)
 app.add_typer(keysmanager.app, name="keys", help="Manage SSH keys")
 
 try:
