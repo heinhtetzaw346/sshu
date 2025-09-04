@@ -95,7 +95,7 @@ def list():
 
     host_block_list = []
     host_block = {}
-    FIELDS = ["Host", "HostName", "User", "IdentityFile", "Port", "Keyed"]
+    FIELDS = ["Host", "HostName", "User", "Port", "Keyed", "IdentityFile"]
 
     with ssh_cfg.open() as f:
         for line in f:
