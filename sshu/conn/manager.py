@@ -4,7 +4,6 @@ from pathlib import Path
 from rich.table import Table
 from rich.console import Console
 from fabric import Connection
-import sys
 
 home_dir = Path.home()
 ssh_dir = home_dir / ".ssh"
@@ -18,7 +17,7 @@ def add(address_string: str, conn_name: str, passwd: bool, copyid: bool, keypair
 
     if conn_name_exists(conn_name, ssh_cfg_content):
         typer.secho(f"Connection {conn_name} already exists", fg=typer.colors.BRIGHT_RED)
-        sys.exit()
+        typer.Exit(code=1)
 
     user,hostname = address_string.split('@')
     host_cfg = f"Host {conn_name}\n  HostName {hostname}\n  User {user}\n  Port {port}\n"
@@ -88,7 +87,7 @@ def copy_pubkey_to_remote(hostname:str, user:str, port:str, retries: int):
             copy_pubkey_to_remote(hostname,user,port,retries - 1)
         else:
             typer.echo(f"host [{hostname}] failed after multiple retries")
-            sys.exit()
+            typer.Exit(code=1)
 
 
 def list():
@@ -150,7 +149,7 @@ def remove(conn_name: str, all: bool, remote: bool):
         
         if confirmation == "n":
             typer.echo("Operation canceled")
-            sys.exit()
+            typer.Exit(code=1)
         elif confirmation == "y":
             typer.echo("Removing sshu configurations")
             remove_all_conn_from_cfg(ssh_cfg_content)
@@ -158,7 +157,7 @@ def remove(conn_name: str, all: bool, remote: bool):
     elif conn_name:
         if not conn_name_exists(conn_name, ssh_cfg_content):
             typer.secho(f"No ssh connection named {conn_name} exists...", fg=typer.colors.BRIGHT_RED)
-            sys.exit()
+            typer.Exit(code=1)
         if remote:
             remove_pubkey_from_remote(conn_name, ssh_cfg_content, retries=3)
 
@@ -205,7 +204,7 @@ def remove_all_conn_from_cfg(ssh_cfg_content):
 
     if sshu_marker not in ssh_cfg_content:
         typer.secho("No sshu configurations found to delete", fg=typer.colors.BRIGHT_RED)
-        sys.exit()
+        typer.Exit(code=1)
 
     sshu_marker_index = ssh_cfg_content.index(sshu_marker)
     sshu_cfg_content = ssh_cfg_content[sshu_marker_index::]
@@ -232,7 +231,7 @@ def remove_pubkey_from_remote(conn_name:str, ssh_cfg_content, retries):
     if keyed_line not in host_block_to_delete:
         typer.secho("This connection is not keyed, there is no public key to delete on the remote host...", fg=typer.colors.BRIGHT_RED)
         typer.echo("Please remove the --remote flag to delete the selected connection...")
-        sys.exit()
+        typer.Exit(code=1)
     else:
         host_info = {} 
 
@@ -256,7 +255,7 @@ def remove_pubkey_from_remote(conn_name:str, ssh_cfg_content, retries):
             if get_authorized_keys.return_code != 0:
                 typer.secho("Getting the authorized_keys file on remote host failed...", fg=typer.colors.BRIGHT_RED)
                 typer.secho(f"ERROR - {get_authorized_keys.stderr.strip()}", fg=typer.colors.BRIGHT_RED)
-                sys.exit()
+                typer.Exit(code=1)
 
             remote_authorized_keys = get_authorized_keys.stdout
             remote_authorized_keys = remote_authorized_keys.replace(pubkey,"").strip()
@@ -265,7 +264,7 @@ def remove_pubkey_from_remote(conn_name:str, ssh_cfg_content, retries):
             if update_authorized_keys.return_code != 0:
                 typer.secho("Removing the pubkey from the remote host failed, aborting the remove action...", fg=typer.colors.BRIGHT_RED)
                 typer.secho(f"ERROR - {update_authorized_keys.stderr.strip()}", fg=typer.colors.BRIGHT_RED)
-                sys.exit()
+                typer.Exit(code=1)
             typer.echo(f"Public key successfully deleted from {host_info["HostName"]}")
 
         except Exception as e:
@@ -276,10 +275,10 @@ def remove_pubkey_from_remote(conn_name:str, ssh_cfg_content, retries):
                 while confirmation not in ("y","n"):
                     confirmation = input("Retry? Y/n: ").strip().lower() or "y"
                 if confirmation == "n":
-                    sys.exit()
+                    typer.Exit(code=1)
                 elif confirmation == "y":
                     typer.echo(f"Retrying pubkey removal from [{host_info["HostName"]}] {retries} retries left... ")
                     remove_pubkey_from_remote(conn_name, ssh_cfg_content, retries -1)
             else:
                 typer.echo(f"host [{host_info["HostName"]}] failed after multiple retries")
-                sys.exit()
+                typer.Exit(code=1)
