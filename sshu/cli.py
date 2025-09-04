@@ -160,6 +160,9 @@ def rm(
     """
     remove ssh connections
     """
+    if all and remote:
+        typer.secho("You can't use --remote with --all option", fg=typer.colors.BRIGHT_RED, err=True)
+        raise typer.Exit(code=1)
     connmanager.remove(conn_name, all, remote)
 
 @app.command()
