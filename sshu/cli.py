@@ -8,7 +8,24 @@ from pathlib import Path
 from sshu.conn import manager as connmanager
 from sshu.keys import manager as keysmanager
 
-app = typer.Typer(help = "Manage SSH connections and keys",add_completion=False)
+help_message = """  Manage SSH connections and keys\n
+                    Examples\n
+                    sshu add --passwd --copyid sysadmin@192.168.1.25 db_server\n
+                    sshu add --keypair ~/.ssh/Web_Server_Key.pem sysadmin@192.168.1.50 web_server\n
+                    sshu ls\n
+                    sshu rm web_server\n
+                    sshu rm --remote db_server\n
+                    \n
+                    You can also use short forms of the options\n
+                    sshu add -P -c sysadmin@192.168.1.25 db_server\n
+                    sshu add -k ~/.ssh/Web_Server_Key.pem sysadmin@192.168.1.50 web_server\n
+                    sshu rm -r db_server\n
+                    \n
+                    You can also specify ports for non default ssh ports by using --port or -p\n
+                    sshu add --port 8282 --keypair ~/.ssh/Web_Server_Key.pem sysadmin@192.168.1.50 web_server
+               """
+
+app = typer.Typer(help = help_message,add_completion=False)
 app.add_typer(keysmanager.app, name="keys", help="Manage SSH keys")
 
 try:
@@ -19,6 +36,7 @@ except importlib.metadata.PackageNotFoundError:
 home_dir = Path.home()
 ssh_dir = home_dir / ".ssh"
 ssh_cfg = ssh_dir / "config"
+keys_dir = ssh_dir / "keys"
 sshu_marker = "#### Managed by SSHU ####"
 
 @app.callback()
@@ -65,6 +83,10 @@ def initialize_ssh_config():
     if not ssh_dir.exists():
         ssh_dir.mkdir(mode=0o700)
         logging.debug(f"Created {ssh_dir} with permission 700")
+
+    if not keys_dir.exists():
+        keys_dir.mkdir(mode=0o700)
+        logging.debug(f"Created {keys_dir} with permission 700")
 
     if not ssh_cfg.exists():
         ssh_cfg.touch(mode=0o600)
@@ -143,6 +165,9 @@ def rm(
     """
     remove ssh connections
     """
+    if all and remote:
+        typer.secho("You can't use --remote with --all option", fg=typer.colors.BRIGHT_RED, err=True)
+        raise typer.Exit(code=1)
     connmanager.remove(conn_name, all, remote)
 
 @app.command()
