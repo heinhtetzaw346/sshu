@@ -3,7 +3,7 @@ from pathlib import Path
 from rich.table import Table
 from rich.console import Console
 import sys
-from .config_utils import conn_name_exists, remove_conn_from_cfg, remove_all_conn_from_cfg
+from .config_utils import conn_name_exists, remove_conn_from_cfg, remove_all_conn_from_cfg, add_key_to_keys_dir
 from .remote_utils import copy_pubkey_to_remote, remove_pubkey_from_remote
 
 home_dir = Path.home()
@@ -31,7 +31,13 @@ def add(address_string: str, conn_name: str, passwd: bool, copyid: bool, keypair
             host_cfg = host_cfg + "  #Keyed yes\n"
     
     if keypair:
-        typer.echo(f"Adding ssh connection {conn_name} to {address_string} with private-key {keypair}")
+        keypair_path = Path(keypair)
+        if not keypair_path.exists():
+            typer.secho(f"No key exists at {keypair}", fg=typer.colors.BRIGHT_RED)
+            sys.exit()
+        else:
+            new_key_file = add_key_to_keys_dir(keypair_path)
+            host_cfg = host_cfg + f"  IdentityFile {new_key_file}\n  #Keyed yes"
 
     ssh_cfg_content.append(host_cfg)
     ssh_cfg.write_text("\n".join(ssh_cfg_content)+"\n")
@@ -64,8 +70,9 @@ def list():
                 if host_block:
                     host_block_list.append(host_block)
                 host_block = {"Host": value}
-
             else:
+                if key == "IdentityFile":
+                    value = value.split("/")[-1]
                 if key == "#Keyed":
                     key = key.strip("#")
                 if key in FIELDS:

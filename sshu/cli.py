@@ -36,6 +36,7 @@ except importlib.metadata.PackageNotFoundError:
 home_dir = Path.home()
 ssh_dir = home_dir / ".ssh"
 ssh_cfg = ssh_dir / "config"
+keys_dir = ssh_dir / "keys"
 sshu_marker = "#### Managed by SSHU ####"
 
 @app.callback()
@@ -82,6 +83,10 @@ def initialize_ssh_config():
     if not ssh_dir.exists():
         ssh_dir.mkdir(mode=0o700)
         logging.debug(f"Created {ssh_dir} with permission 700")
+
+    if not keys_dir.exists():
+        keys_dir.mkdir(mode=0o700)
+        logging.debug(f"Created {keys_dir} with permission 700")
 
     if not ssh_cfg.exists():
         ssh_cfg.touch(mode=0o600)
