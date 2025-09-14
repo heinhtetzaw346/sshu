@@ -3,7 +3,7 @@ from pathlib import Path
 from rich.table import Table
 from rich.console import Console
 import sys
-from .config_utils import conn_name_exists, remove_conn_from_cfg, remove_all_conn_from_cfg, add_key_to_keys_dir
+from .config_utils import add_conn_to_cfg, conn_name_exists, remove_conn_from_cfg, remove_all_conn_from_cfg, add_key_to_keys_dir
 from .remote_utils import copy_pubkey_to_remote, remove_pubkey_from_remote
 
 home_dir = Path.home()
@@ -22,7 +22,6 @@ def add(address_string: str, conn_name: str, passwd: bool, copyid: bool, keypair
 
     user,hostname = address_string.split('@')
     host_cfg = f"Host {conn_name}\n  HostName {hostname}\n  User {user}\n  Port {port}\n"
-    ssh_cfg_content = ssh_cfg.read_text().splitlines()
     
     if passwd:
         if copyid:
@@ -38,9 +37,7 @@ def add(address_string: str, conn_name: str, passwd: bool, copyid: bool, keypair
         else:
             new_key_file = add_key_to_keys_dir(keypair_path)
             host_cfg = host_cfg + f"  IdentityFile {new_key_file}\n  #Keyed yes"
-
-    ssh_cfg_content.append(host_cfg)
-    ssh_cfg.write_text("\n".join(ssh_cfg_content)+"\n")
+    add_conn_to_cfg(host_cfg,ssh_cfg_content)
     typer.echo(f"Connection {conn_name} added")
 
 
