@@ -10,13 +10,12 @@ home_dir = Path.home()
 ssh_dir = home_dir / ".ssh"
 ssh_cfg = ssh_dir / "config"
 sshu_marker = "#### Managed by SSHU ####"
+keys_dir = ssh_dir / "keys"
 
 
 def add(address_string: str, conn_name: str, passwd: bool, copyid: bool, keypair: str, port: str):
 
-    ssh_cfg_content = ssh_cfg.read_text().splitlines()
-
-    if conn_name_exists(conn_name, ssh_cfg_content):
+    if conn_name_exists(conn_name, ssh_cfg):
         typer.secho(f"Connection {conn_name} already exists", fg=typer.colors.BRIGHT_RED)
         sys.exit()
 
@@ -30,14 +29,14 @@ def add(address_string: str, conn_name: str, passwd: bool, copyid: bool, keypair
             host_cfg = host_cfg + "  #Keyed yes\n"
     
     if keypair:
-        keypair_path = Path(keypair)
-        if not keypair_path.exists():
+        keypair_to_add = Path(keypair)
+        if not keypair_to_add.exists():
             typer.secho(f"No key exists at {keypair}", fg=typer.colors.BRIGHT_RED)
             sys.exit()
         else:
-            new_key_file = add_key_to_keys_dir(keypair_path)
+            new_key_file = add_key_to_keys_dir(keypair_to_add,keys_dir)
             host_cfg = host_cfg + f"  IdentityFile {new_key_file}\n  #Keyed yes"
-    add_conn_to_cfg(host_cfg,ssh_cfg_content)
+    add_conn_to_cfg(host_cfg,ssh_cfg)
     typer.echo(f"Connection {conn_name} added")
 
 
@@ -92,8 +91,6 @@ def list():
 
 def remove(conn_name: str, all: bool, remote: bool):
 
-    ssh_cfg_content = ssh_cfg.read_text().splitlines()
-
     if all:
         confirmation: str = ""
         while confirmation not in ("y","n"):
@@ -104,14 +101,14 @@ def remove(conn_name: str, all: bool, remote: bool):
             sys.exit()
         elif confirmation == "y":
             typer.echo("Removing sshu configurations")
-            remove_all_conn_from_cfg(ssh_cfg_content)
+            remove_all_conn_from_cfg(ssh_cfg)
 
     elif conn_name:
-        if not conn_name_exists(conn_name, ssh_cfg_content):
+        if not conn_name_exists(conn_name, ssh_cfg):
             typer.secho(f"No ssh connection named {conn_name} exists...", fg=typer.colors.BRIGHT_RED)
             sys.exit()
         if remote:
-            remove_pubkey_from_remote(conn_name, ssh_cfg_content, retries=3)
+            remove_pubkey_from_remote(conn_name, ssh_cfg, retries=3)
 
-        remove_conn_from_cfg(conn_name,ssh_cfg_content)
+        remove_conn_from_cfg(conn_name,ssh_cfg)
         typer.echo(f"Deleted ssh connection {conn_name}")

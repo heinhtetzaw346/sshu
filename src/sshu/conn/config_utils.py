@@ -3,19 +3,18 @@ from pathlib import Path
 import sys
 import os
 
-home_dir = Path.home()
-ssh_dir = home_dir / ".ssh"
-ssh_cfg = ssh_dir / "config"
-keys_dir = ssh_dir / "keys"
 sshu_marker = "#### Managed by SSHU ####"
 
-def add_conn_to_cfg(host_cfg: str, ssh_cfg_content: list):
+def add_conn_to_cfg(host_cfg: str, ssh_cfg: Path):
+
+    ssh_cfg_content = ssh_cfg.read_text().splitlines()
     ssh_cfg_content.append(host_cfg)
     ssh_cfg.write_text("\n".join(ssh_cfg_content)+"\n")
 
 
-def conn_name_exists(conn_name: str, ssh_cfg_content: list):
+def conn_name_exists(conn_name: str, ssh_cfg: Path):
     
+    ssh_cfg_content = ssh_cfg.read_text().splitlines()
     conn_name_list = []
 
     for line in ssh_cfg_content:
@@ -29,8 +28,9 @@ def conn_name_exists(conn_name: str, ssh_cfg_content: list):
         return False
 
 
-def remove_conn_from_cfg(conn_name: str, ssh_cfg_content: list  ):
+def remove_conn_from_cfg(conn_name: str, ssh_cfg: Path):
 
+    ssh_cfg_content = ssh_cfg.read_text().splitlines()
     ssh_cfg_str = "\n".join(ssh_cfg_content)
 
     host_block_to_delete = []
@@ -47,8 +47,9 @@ def remove_conn_from_cfg(conn_name: str, ssh_cfg_content: list  ):
     ssh_cfg.write_text(ssh_cfg_str)
 
 
-def remove_all_conn_from_cfg(ssh_cfg_content: list):
+def remove_all_conn_from_cfg(ssh_cfg: Path):
 
+    ssh_cfg_content = ssh_cfg.read_text().splitlines()
     ssh_cfg_str = "\n".join(ssh_cfg_content)
 
     if sshu_marker not in ssh_cfg_content:
@@ -61,10 +62,10 @@ def remove_all_conn_from_cfg(ssh_cfg_content: list):
     ssh_cfg_str = ssh_cfg_str.replace(sshu_cfg_str, "")
     ssh_cfg.write_text(ssh_cfg_str)
 
-def add_key_to_keys_dir(keypair_path):
+def add_key_to_keys_dir(keypair_to_add: Path, keys_dir: Path):
 
-    keyfile = os.path.basename(keypair_path)
-    key_file_content = keypair_path.read_text()
+    keyfile = os.path.basename(keypair_to_add)
+    key_file_content = keypair_to_add.read_text()
     new_key_file = keys_dir / keyfile
     
     if not new_key_file.exists():
