@@ -67,7 +67,7 @@ IdentityFile /home/test/.ssh/keys/unittest.pem
     assert not existing_conn in ssh_cfg_content
 
 
-def test_key_to_keys_dir(temp: tuple):
+def test_add_key_to_keys_dir(temp: tuple):
     ssh_dir: Path = temp[1]
     keys_dir = ssh_dir / "keys"
     if not keys_dir.exists():
@@ -75,20 +75,15 @@ def test_key_to_keys_dir(temp: tuple):
     keypair_to_add = ssh_dir / "unittestkey.pem"
     if not keypair_to_add.exists():
         keypair_to_add.touch(mode=0o600)
-    keypair_to_add.write_text("""
+    privkey = """
 -----BEGIN OPENSSH PRIVATE KEY-----
 unittestkeydwap[di9aufpeosjflajwiauwpoakdwd
 jeoiafjoeafkwopakdwoa;fjiv9pip[ri4wyoiufioa
 djapoupoefpoaifoapfkoefkopefopeidajdajdddd
------END OPENSSH PRIVATE KEY-----""")
+-----END OPENSSH PRIVATE KEY-----
+"""
+    keypair_to_add.write_text(privkey)
     add_key_to_keys_dir(keypair_to_add,keys_dir)
 
     new_keypair = keys_dir / "unittestkey.pem"
-    assert new_keypair.exists() and new_keypair.read_text() == """
------BEGIN OPENSSH PRIVATE KEY-----
-unittestkeydwap[di9aufpeosjflajwiauwpoakdwd
-jeoiafjoeafkwopakdwoa;fjiv9pip[ri4wyoiufioa
-djapoupoefpoaifoapfkoefkopefopeidajdajdddd
------END OPENSSH PRIVATE KEY-----"""
-
-
+    assert new_keypair.exists() and new_keypair.read_text() == privkey
