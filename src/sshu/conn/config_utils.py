@@ -9,7 +9,12 @@ ssh_cfg = ssh_dir / "config"
 keys_dir = ssh_dir / "keys"
 sshu_marker = "#### Managed by SSHU ####"
 
-def conn_name_exists(conn_name: str, ssh_cfg_content):
+def add_conn_to_cfg(host_cfg: str, ssh_cfg_content: list):
+    ssh_cfg_content.append(host_cfg)
+    ssh_cfg.write_text("\n".join(ssh_cfg_content)+"\n")
+
+
+def conn_name_exists(conn_name: str, ssh_cfg_content: list):
     
     conn_name_list = []
 
@@ -24,7 +29,7 @@ def conn_name_exists(conn_name: str, ssh_cfg_content):
         return False
 
 
-def remove_conn_from_cfg(conn_name: str, ssh_cfg_content  ):
+def remove_conn_from_cfg(conn_name: str, ssh_cfg_content: list  ):
 
     ssh_cfg_str = "\n".join(ssh_cfg_content)
 
@@ -42,7 +47,7 @@ def remove_conn_from_cfg(conn_name: str, ssh_cfg_content  ):
     ssh_cfg.write_text(ssh_cfg_str)
 
 
-def remove_all_conn_from_cfg(ssh_cfg_content):
+def remove_all_conn_from_cfg(ssh_cfg_content: list):
 
     ssh_cfg_str = "\n".join(ssh_cfg_content)
 
