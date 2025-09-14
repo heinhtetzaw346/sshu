@@ -105,7 +105,7 @@ def initialize_ssh_keys(ssh_dir):
    ssh_dir_contents = os.listdir(ssh_dir)
    if not "id_ed25519.pub" in ssh_dir_contents:
        process = subprocess.Popen(
-           ["ssh-keygen", "-t", "ed25519", "-f", f"{home_dir}/.ssh/id_ed25519", "-N", ""],
+           ["ssh-keygen", "-t", "ed25519", "-f", f"{ssh_dir}/id_ed25519", "-N", ""],
            stdin=subprocess.PIPE,
            stdout=subprocess.PIPE,
            stderr=subprocess.PIPE,
