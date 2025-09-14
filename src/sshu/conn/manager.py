@@ -3,7 +3,7 @@ from pathlib import Path
 from rich.table import Table
 from rich.console import Console
 import sys
-from .config_utils import add_conn_to_cfg, conn_name_exists, remove_conn_from_cfg, remove_all_conn_from_cfg, add_key_to_keys_dir
+from .config_utils import add_conn_to_cfg, parse_cfg_for_list, conn_name_exists, remove_conn_from_cfg, remove_all_conn_from_cfg, add_key_to_keys_dir
 from .remote_utils import copy_pubkey_to_remote, remove_pubkey_from_remote
 
 home_dir = Path.home()
@@ -42,51 +42,21 @@ def add(address_string: str, conn_name: str, passwd: bool, copyid: bool, keypair
 
 def list():
 
-    host_block_list = []
-    host_block = {}
     FIELDS = ["Host", "HostName", "User", "Port", "Keyed", "IdentityFile"]
-
-    with ssh_cfg.open() as f:
-        for line in f:
-            stripped = line.strip()
-            if not stripped: #or stripped.startswith('#'):
-                continue
-            
-            key_value = stripped.split(maxsplit=1)
-            if len(key_value) != 2:
-                continue
-
-            key , value = key_value
-            key = key.strip()
-            value = value.strip()
-
-            if key == "Host":
-                if value == "*":
-                    continue
-                if host_block:
-                    host_block_list.append(host_block)
-                host_block = {"Host": value}
-            else:
-                if key == "IdentityFile":
-                    value = value.split("/")[-1]
-                if key == "#Keyed":
-                    key = key.strip("#")
-                if key in FIELDS:
-                    host_block[key] = value
-        if host_block:
-            host_block_list.append(host_block)
+    
+    host_block_list = parse_cfg_for_list(ssh_cfg,FIELDS)
         
-        table = Table(title="SSH Connections")
+    table = Table(title="SSH Connections")
 
-        for field in FIELDS:
-            table.add_column(field)
+    for field in FIELDS:
+        table.add_column(field)
 
-        for host_block in host_block_list:
-            row = [host_block.get(field, "-") for field in FIELDS]
-            table.add_row(*row)
-        
-        console = Console()
-        console.print(table)
+    for host_block in host_block_list:
+        row = [host_block.get(field, "-") for field in FIELDS]
+        table.add_row(*row)
+    
+    console = Console()
+    console.print(table)
 
 
 def remove(conn_name: str, all: bool, remote: bool):
