@@ -1,4 +1,4 @@
-from sshu.cli import initialize_ssh_config
+from sshu.cli import initialize_ssh_config, initialize_ssh_keys
 from pathlib import Path
 import pytest
 
@@ -25,3 +25,11 @@ def test_init_ssh_config_marker(temp: tuple):
         assert "#### Managed by SSHU ####" in ssh_cfg.read_text()
     else:
         pytest.fail("ssh config is not created!")
+
+def test_init_keys(temp: tuple):
+    ssh_dir: Path = temp[1]
+    initialize_ssh_keys(ssh_dir)
+    pubkey = ssh_dir / "id_ed25519.pub"
+    privkey = ssh_dir / "id_ed25519"
+    
+    assert pubkey.exists() and privkey.exists()
