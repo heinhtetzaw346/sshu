@@ -31,12 +31,10 @@ app.add_typer(keysmanager.app, name="keys", help="Manage SSH keys")
 try:
     __version__ = importlib.metadata.version("sshu")
 except importlib.metadata.PackageNotFoundError:
-    __version__ = "0.1.1"
+    __version__ = "0.1.2"
 
 home_dir = Path.home()
 ssh_dir = home_dir / ".ssh"
-ssh_cfg = ssh_dir / "config"
-keys_dir = ssh_dir / "keys"
 sshu_marker = "#### Managed by SSHU ####"
 
 @app.callback()
@@ -49,8 +47,8 @@ def main(verbose: int = typer.Option(0, "--verbose", "-v", count=True)):
         stdout_level = logging.DEBUG
     
     configure_logging(stdout_level)
-    initialize_ssh_config()
-    initialize_ssh_keys()
+    initialize_ssh_config(ssh_dir)
+    initialize_ssh_keys(ssh_dir)
 
 def configure_logging(stdout_level=logging.CRITICAL):
 
@@ -76,10 +74,12 @@ def configure_logging(stdout_level=logging.CRITICAL):
 
     return logger
 
-def initialize_ssh_config():
+def initialize_ssh_config(ssh_dir: Path):
     
     logging.info(f"Initializing ssh directory and its contents at {ssh_dir}...")
-
+    
+    keys_dir = ssh_dir / "keys"
+    ssh_cfg = ssh_dir / "config"
     if not ssh_dir.exists():
         ssh_dir.mkdir(mode=0o700)
         logging.debug(f"Created {ssh_dir} with permission 700")
@@ -100,7 +100,7 @@ def initialize_ssh_config():
         ssh_cfg.write_text("\n".join(ssh_cfg_contents) + "\n")
         logging.debug(f"Added '{sshu_marker}' to {ssh_cfg}")
 
-def initialize_ssh_keys():
+def initialize_ssh_keys(ssh_dir):
 
    ssh_dir_contents = os.listdir(ssh_dir)
    if not "id_ed25519.pub" in ssh_dir_contents:
