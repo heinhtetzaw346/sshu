@@ -76,8 +76,6 @@ def configure_logging(stdout_level=logging.CRITICAL):
 
 def initialize_ssh_config(ssh_dir: Path):
     
-    logging.info(f"Initializing ssh directory and its contents at {ssh_dir}...")
-    
     keys_dir = ssh_dir / "keys"
     ssh_cfg = ssh_dir / "config"
     if not ssh_dir.exists():
