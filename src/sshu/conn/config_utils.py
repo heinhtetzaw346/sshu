@@ -5,6 +5,42 @@ import os
 
 sshu_marker = "#### Managed by SSHU ####"
 
+def parse_cfg_for_list(ssh_cfg: Path, FIELDS: list):
+    host_block_list = []
+    host_block = {}
+    with ssh_cfg.open() as f:
+        for line in f:
+            stripped = line.strip()
+            if not stripped: #or stripped.startswith('#'):
+                continue
+
+            key_value = stripped.split(maxsplit=1)
+            if len(key_value) != 2:
+                continue
+
+            key , value = key_value
+            key = key.strip()
+            value = value.strip()
+
+            if key == "Host":
+                if value == "*":
+                    continue
+                if host_block:
+                    host_block_list.append(host_block)
+                host_block = {"Host": value}
+            else:
+                if key == "IdentityFile":
+                    value = value.split("/")[-1]
+                if key == "#Keyed":
+                    key = key.strip("#")
+                if key in FIELDS:
+                    host_block[key] = value
+        if host_block:
+            host_block_list.append(host_block)
+
+    return host_block_list
+
+
 def add_conn_to_cfg(host_cfg: str, ssh_cfg: Path):
 
     ssh_cfg_content = ssh_cfg.read_text().splitlines()
