@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sshu"
-version = "0.1.1"  
+version = "0.1.2"  
 description = "An ssh utility tool to manage ssh connections and keys"
 authors = ["Hein Htet Zaw <h3inhtetzaw346@gmail.com>"]
 packages = [{include = "sshu", from = "src"}]
@@ -17,3 +17,7 @@ appdirs = ">=1.4.4,<2.0.0"
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
