@@ -73,6 +73,11 @@ jobs:
         run: |
             $Env:PYTHONPATH = ".\src"
             poetry run pyinstaller --name sshu --distpath .\bin -p .\src\sshu --onefile .\src\sshu\cli.py
+      - name: Archive binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: sshu-windows
+          path: bin/sshu.exe
 
   build_macos:
     needs: test
@@ -92,3 +97,8 @@ jobs:
         run: poetry install
       - name: Build binary
         run: PYTHONPATH=./src poetry run pyinstaller --name sshu --distpath ./bin -p ./src/sshu --onefile ./src/sshu/cli.py
+      - name: Archive binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: sshu-macos
+          path: bin/sshu
