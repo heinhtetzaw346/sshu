@@ -13,7 +13,7 @@ def test_cli_version():
     version_from_file = "0.0.0"
     for line in project_file_contents:
         if "version" in line:
-            version_from_file = line.split(" = ")[1].replace('"','')
+            version_from_file = line.split(" = ")[1].replace('"','').strip()
             break
     try:
         __version__ = version("sshu")
