@@ -14,7 +14,7 @@ RUN mkdir /dist
 
 RUN mkdir sshu
 
-COPY ./sshu sshu
+COPY ./src/sshu sshu
 
 ENTRYPOINT ["/venv/bin/python", "-m", "PyInstaller"]
 
