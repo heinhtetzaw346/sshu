@@ -16,6 +16,8 @@ jobs:
         uses: actions/checkout@v4
       - name: Install dependencies
         run: pip install -r requirement.txt
+      - name: Install with poetry
+        run: poetry install
       - name: Run Test
         run: pytest -vv
 
