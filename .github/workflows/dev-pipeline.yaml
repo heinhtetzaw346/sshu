@@ -15,7 +15,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
       - name: Install dependencies
-        run: pip install -r requrement.txt
+        run: pip install -r requirement.txt
       - name: Run Test
         run: pytest -vv
 
