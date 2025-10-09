@@ -19,7 +19,7 @@ jobs:
       - name: Install with poetry
         run: poetry install
       - name: Run Test
-        run: poetry run pytest -vv
+        run: PYTHONPATH=./src poetry run pytest -vv
 
   build_linux_glibc:
     needs: test
@@ -70,7 +70,7 @@ jobs:
       - name: Install with poetry
         run: poetry install
       - name: Build binary
-        run: poetry run pyinstaller --name sshu --distpath ./bin -p ./src/sshu --onefile ./src/sshu/cli.py
+        run: PYTHONPATH=./src poetry run pyinstaller --name sshu --distpath ./bin -p ./src/sshu --onefile ./src/sshu/cli.py
 
   build_macos:
     needs: test
@@ -89,4 +89,4 @@ jobs:
       - name: Install with poetry
         run: poetry install
       - name: Build binary
-        run: poetry run pyinstaller --name sshu --distpath ./bin -p ./src/sshu --onefile ./src/sshu/cli.py
+        run: PYTHONPATH=./src poetry run pyinstaller --name sshu --distpath ./bin -p ./src/sshu --onefile ./src/sshu/cli.py
