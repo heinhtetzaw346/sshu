@@ -30,7 +30,7 @@ jobs:
       - name: Build docker image to build binary
         run: docker build -t local/sshu-build:latest -f build/Dockerfile.linux_glibc .
       - name: Build binary
-        run: docker run --rm -it -v ./bin:/dist local/sshu-build:latest
+        run: docker run --rm -v ./bin:/dist local/sshu-build:latest
       - name: Archive binary
         uses: actions/upload-artifact@v4
         with:
@@ -46,7 +46,7 @@ jobs:
       - name: Build docker image to build binary
         run: docker build -t local/sshu-build:latest -f build/Dockerfile.linux_musl .
       - name: Build binary
-        run: docker run --rm -it -v ./bin:/dist local/sshu-build:latest
+        run: docker run --rm -v ./bin:/dist local/sshu-build:latest
       - name: Archive binary
         uses: actions/upload-artifact@v4
         with:
@@ -70,7 +70,9 @@ jobs:
       - name: Install with poetry
         run: poetry install
       - name: Build binary
-        run: PYTHONPATH=./src poetry run pyinstaller --name sshu --distpath ./bin -p ./src/sshu --onefile ./src/sshu/cli.py
+        run: |
+            $Env:PYTHONPATH = ".\src"
+            poetry run pyinstaller --name sshu --distpath .\bin -p .\src\sshu --onefile .\src\sshu\cli.py
 
   build_macos:
     needs: test
