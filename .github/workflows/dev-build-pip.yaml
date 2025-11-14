@@ -11,6 +11,11 @@ jobs:
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+      - name: Set ShortSHA
+        id: shortsha
+        run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
+      - name: Check ShortSHA
+        run: echo ${{ steps.shortsha.outputs.sha }}
       - name: Set up Python 3.12
         uses: actions/setup-python@v6
         with:
@@ -23,9 +28,6 @@ jobs:
         run: poetry install
       - name: Build pip
         run: poetry build
-      - name: Short SHA
-        id: shortsha
-        run: echo "sha=${GITHUB_SHA::8}" >> $GITHUB_OUTPUT
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
@@ -51,7 +53,7 @@ jobs:
           python3 -m pip install --upgrade pip
           pip install -r requirement.txt
       - name: Set version
-        run: sed "s/\(version = \).*/\1\"${{ github.sha::8 }}\"/" pyproject.toml
+        run: sed "s/\(version = \).*/\1\"${{ steps.shortsha.outputs.sha }}\"/" pyproject.toml
       - name: Set token
         run: echo -e "[testpypi]\nusername = __token__\npassword = ${{ secrets.TEST_PYPI_TOKEN }}" > $HOME/.pypirc
       - name: Upload to test-pypi
