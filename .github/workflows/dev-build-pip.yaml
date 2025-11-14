@@ -57,4 +57,4 @@ jobs:
       - name: Set token
         run: echo -e "[testpypi]\nusername = __token__\npassword = ${{ secrets.TEST_PYPI_TOKEN }}" > $HOME/.pypirc
       - name: Upload to test-pypi
-        run: twine upload --repository testpypi dist/*aa || true
+        run: twine upload --repository testpypi dist/* || true
