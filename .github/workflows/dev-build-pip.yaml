@@ -40,7 +40,7 @@ jobs:
       - name: Download artifacts
         uses: actions/download-artifacts@v4
         with:
-          name: pip-${{ github.sha::8 }}
+          name: pip-${{ steps.shortsha.outputs.sha }}
           path: dist
       - name: Set up Python 3.12
         uses: actions/setup-python@v6
