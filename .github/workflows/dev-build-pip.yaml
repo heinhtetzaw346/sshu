@@ -36,6 +36,8 @@ jobs:
     needs: build_pip
     runs-on: ubuntu-24.04
     steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
       - name: Set ShortSHA
         id: shortsha
         run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
