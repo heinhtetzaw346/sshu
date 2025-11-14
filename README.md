@@ -92,7 +92,7 @@ pip install -r requirement.txt
 Run pyinstaller
 
 ```
-pyinstaller --name sshu --distpath ./dist -p ./sshu --onefile ./sshu/cli.py 
+pyinstaller --name sshu --distpath ./bin -p ./sshu --onefile ./sshu/cli.py
 ```
 
 The resulting binary will be in the ./dist directory.
@@ -114,7 +114,7 @@ docker build -t local/sshu-build:latest -f build/Dockerfile.linux_glibc .
 Run container to build image. Specifiy the correct ./dist sub dir.
 
 ```
-docker run --rm -it -v ./dist/linux_glibc:/dist local/sshu-build:latest
+docker run --rm -it -v ./bin/linux_glibc:/dist local/sshu-build:latest
 ```
 
 The resulting binary will be in the ./dist directory in the dir you specified.
