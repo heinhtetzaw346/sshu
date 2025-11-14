@@ -55,8 +55,8 @@ jobs:
           python3 -m pip install --upgrade pip
           pip install -r requirement.txt
       - name: Set version
-        run: sed "s/\(version = \).*/\1\"${{ steps.shortsha.outputs.sha }}\"/" pyproject.toml
+        run: sed -i "s/\(version = .*\)\"$/\1-${{ steps.shortsha.outputs.sha }}\"/" pyproject.toml
       - name: Set token
         run: echo -e "[testpypi]\nusername = __token__\npassword = ${{ secrets.TEST_PYPI_TOKEN }}" > $HOME/.pypirc
       - name: Upload to test-pypi
-        run: twine upload --repository testpypi dist/*
+        run: python3 -m twine upload --repository testpypi dist/*
