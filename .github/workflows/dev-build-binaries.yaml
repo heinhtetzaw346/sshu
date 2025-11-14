@@ -1,4 +1,4 @@
-name: sshu-dev-pipeline
+name: dev-build-binaries
 run-name: ${{ github.actor }} triggered dev pipeline with ${{ github.event_name }} to main
 on:
   push:
