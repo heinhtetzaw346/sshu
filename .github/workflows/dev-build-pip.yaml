@@ -1,0 +1,55 @@
+name: dev-build-pip
+run-name: ${{ github.actor }} triggered dev pipeline with ${{ github.event_name }} to ${{ github.ref_name }}
+on:
+  workflow_run:
+    workflows: ["dev-build-binaries"]
+    types:
+      - completed
+jobs:
+  build_pip:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install -r requirement.txt
+      - name: Install with poetry
+        run: poetry install
+      - name: Build pip
+        run: poetry build
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: pip-${{ github.sha::8 }}
+          path: dist
+
+  upload_pip:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Download artifacts
+        uses: actions/download-artifacts@v4
+        with:
+          name: pip-${{ github.sha::8 }}
+          path: dist
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Install twine
+        run: |
+          python3 -m pip install --upgrade pip
+          pip install -r requirement.txt
+      - name: Set version
+        run: sed "s/\(version = \).*/\1\"${{ github.sha::8 }}\"/" pyproject.toml
+      - name: Set token
+        run: echo -e "[testpypi]\nusername = __token__\npassword = ${{ secrets.TEST_PYPI_TOKEN }}" > $HOME/.pypirc
+      - name: Upload to test-pypi
+        run: twine upload --repository testpypi dist/*
