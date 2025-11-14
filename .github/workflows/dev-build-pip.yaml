@@ -24,6 +24,8 @@ jobs:
           pip install -r requirement.txt
       - name: Install with poetry
         run: poetry install
+      - name: Set version
+        run: sed -i "s/\(version = .*\)\"$/\1-${{ steps.shortsha.outputs.sha }}\"/" pyproject.toml
       - name: Build pip
         run: poetry build
       - name: Upload artifacts
@@ -36,8 +38,6 @@ jobs:
     needs: build_pip
     runs-on: ubuntu-24.04
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
       - name: Set ShortSHA
         id: shortsha
         run: echo "sha=$(git rev-parse --short HEAD)" >> $GITHUB_OUTPUT
@@ -54,8 +54,6 @@ jobs:
         run: |
           python3 -m pip install --upgrade pip
           pip install twine
-      - name: Set version
-        run: sed -i "s/\(version = .*\)\"$/\1-${{ steps.shortsha.outputs.sha }}\"/" pyproject.toml
       - name: Set token
         run: echo -e "[testpypi]\nusername = __token__\npassword = ${{ secrets.TEST_PYPI_TOKEN }}" > $HOME/.pypirc
       - name: Upload to test-pypi
