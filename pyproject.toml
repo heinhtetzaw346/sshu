@@ -35,7 +35,7 @@ classifiers = [
     "Operating System :: OS Independent",
 ]
 readme = "README.md"
-license = "Apache2.0"
+license = "GPL-3.0"
 license-files = ["LICEN[CS]E*"]
 
 [project.urls]
