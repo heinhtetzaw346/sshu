@@ -19,7 +19,7 @@ def copy_pubkey_to_remote(hostname:str, user:str, port:str, retries: int):
     with open(sshu_cfg_file,'r') as cfg_file:
         cfg_data: dict = yaml.safe_load(cfg_file)
 
-    default_identity_file: str = cfg_data["default_identity_file"] + ".pub"
+    default_identity_file: str = cfg_data["default_identity_key"] + ".pub"
 
     with open(f"{ssh_dir}/{default_identity_file}") as f:
         pubkey = f.read()
