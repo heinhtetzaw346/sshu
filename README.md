@@ -11,39 +11,50 @@ python cli app made with typer that manages ssh connections interactively with c
 
 ## Supported OS
 
-In current beta version v0.1.0, only Linux is supported. I will try to make it work on all major OS types.
-
+Only linux with glibc libraries is tested by me. All the following OS will have binaries built for them.</br> 
+sshu is not OS specific if installed with pip.
+- Linux (glibc) Debian, RedHat
+- Linux (musl) Alpine
+- MacOS
+- Windows
 
 ## Releases
 
 You can find all official releases on the [Releases page](../../releases).
 
-The [`dist/`](./dist) directory contains the latest development build/binary.
+### Dev Binaries
+For latest dev binaries, you can head over to [https://github.com/FuReAsu/sshu/actions/workflows/dev-build-binaries.yaml](https://github.com/FuReAsu/sshu/actions/workflows/dev-build-binaries.yaml) </br>
+You can click on a pipeline, download the binaries and use them as you like.
+
+### Test Pypi
+For dev pip packages, you can visit [https://test.pypi.org/project/sshu/](https://test.pypi.org/project/sshu/) and download from there.
 
 ## How to use
 
 ### Use the installation script.
 
-Run the following command
+> [!NOTE] 
+> This hasn't been developed and tested fully yet.
+</br>
 
+Run the following command
 ```
 curl -fsSL https://raw.githubusercontent.com/FuReAsu/sshu/refs/heads/main/install/linux_bash/sshu-installer.sh | sudo bash
 ```
 Currently, this script is only usable for Debian-like distros, RedHat-like distros and SUSE distros and using bash-like shell.
 
 
-
 ### Install it yourself
 
-Download the tar file from the releases.
+Download the tar file from the releases. Or the binaries in github-actions workflows.
 
-Extract it
+Extract it if tar or zip
 
 ```
 tar -xzvf sshu-beta-v0.1.1.tar.gz
 ```
 
-Move it to a local binary directory.
+Move the binary to a local binary directory.
 
 ```
 sudo mv sshu /usr/local/bin/
@@ -53,14 +64,15 @@ You can now start running sshu commands.
 ## Command Reference
 
 Currently only the main sshu cli app is working, keys haven't been worked on.
-Even in the main sshu cli app, --keypair is not implemented yet.
 
 All working commands:
 
 - sshu ls
 - sshu add --passwd user@hostname connection_name
 - sshu add --passwd --copyid user@hostname connection_name
+- sshu add --keypair /path/to/key user@hostname connection_name
 - sshu rm connection_name
+- sshu rm --remote connection_name
 - sshu rm --all
 
 
@@ -68,6 +80,7 @@ All working commands:
 
 Below are what I used in sshu:
 
+- Python 3.12
 - Typer for cli app
 - Fabric for remote command execution over ssh connection
 
@@ -117,4 +130,9 @@ Run container to build image. Specifiy the correct ./dist sub dir.
 docker run --rm -it -v ./bin/linux_glibc:/dist local/sshu-build:latest
 ```
 
-The resulting binary will be in the ./dist directory in the dir you specified.
+The resulting binary will be in the ./bin directory.
+
+You can then move this binary into the binary path. Like
+```bash
+cp bin/sshu /usr/local/bin
+```
