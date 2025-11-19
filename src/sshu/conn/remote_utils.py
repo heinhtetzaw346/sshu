@@ -3,16 +3,25 @@ import getpass
 from pathlib import Path
 from fabric import Connection
 import sys
+import appdirs
+import yaml
 
 home_dir = Path.home()
 ssh_dir = home_dir / ".ssh"
 ssh_cfg = ssh_dir / "config"
 sshu_marker = "#### Managed by SSHU ####"
 
+sshu_cfg_dir = Path(appdirs.user_config_dir("sshu", "FuReAsu"))
+sshu_cfg_file = sshu_cfg_dir / "config.yaml"
 
 def copy_pubkey_to_remote(hostname:str, user:str, port:str, retries: int):
 
-    with open(f"{ssh_dir}/id_ed25519.pub") as f:
+    with open(sshu_cfg_file,'r') as cfg_file:
+        cfg_data: dict = yaml.safe_load(cfg_file)
+
+    default_identity_file: str = cfg_data["default_identity_file"] + ".pub"
+
+    with open(f"{ssh_dir}/{default_identity_file}") as f:
         pubkey = f.read()
     
     password = getpass.getpass("Please enter the ssh user password:") 
