@@ -1,6 +1,7 @@
 import typer
 import importlib.metadata
 import os
+import sys
 import logging
 import appdirs
 import yaml
@@ -36,6 +37,8 @@ except importlib.metadata.PackageNotFoundError:
 home_dir = Path.home()
 ssh_dir = home_dir / ".ssh"
 sshu_marker = "#### Managed by SSHU ####"
+sshu_cfg_dir = Path(appdirs.user_config_dir("sshu", "FuReAsu"))
+sshu_cfg_file = sshu_cfg_dir / "config.yaml"
 
 @app.callback()
 def main(verbose: int = typer.Option(0, "--verbose", "-v", count=True)):
@@ -47,9 +50,9 @@ def main(verbose: int = typer.Option(0, "--verbose", "-v", count=True)):
         stdout_level = logging.DEBUG
     
     configure_logging(stdout_level)
-    initialize_ssh_config(ssh_dir)
-    initialize_sshu_config(ssh_dir)
-    initialize_ssh_keys(ssh_dir)
+    initialize_sshu_config(ssh_dir,sshu_cfg_dir, sshu_cfg_file)
+    initialize_ssh_config(ssh_dir, sshu_cfg_file)
+    initialize_ssh_keys(ssh_dir, sshu_cfg_file)
 
 def configure_logging(stdout_level=logging.CRITICAL):
 
@@ -76,9 +79,13 @@ def configure_logging(stdout_level=logging.CRITICAL):
 
     return logger
 
-def initialize_ssh_config(ssh_dir: Path):
-    
-    keys_dir = ssh_dir / "keys"
+def initialize_ssh_config(ssh_dir: Path, sshu_cfg_file: Path):
+  
+    with open(sshu_cfg_file,'r') as cfg_file:
+        cfg_data = yaml.safe_load(cfg_file) or {}
+
+    keys_dir: Path = Path(cfg_data["keys_dir"])
+
     ssh_cfg = ssh_dir / "config"
     if not ssh_dir.exists():
         ssh_dir.mkdir(mode=0o700)
@@ -100,19 +107,25 @@ def initialize_ssh_config(ssh_dir: Path):
         ssh_cfg.write_text("\n".join(ssh_cfg_contents) + "\n")
         logging.debug(f"Added '{sshu_marker}' to {ssh_cfg}")
 
-def initialize_ssh_keys(ssh_dir):
+def initialize_ssh_keys(ssh_dir: Path, sshu_cfg_file: Path):
+
+    with open(sshu_cfg_file,'r') as cfg_file:
+        cfg_data = yaml.safe_load(cfg_file) or {}
+
+    default_identity_key: str = cfg_data["default_identity_key"]
 
     ssh_dir_contents = os.listdir(ssh_dir)
-    print(ssh_dir_contents)
-    if not "id_" in ssh_dir_contents:
-        typer.echo("No ssh key pairs that starts with id found. Please run ssh-keygen first")
-        logging.info("No public keys exists.")
+    logging.debug(f"ssh dir contents -> {ssh_dir_contents}")
+    if not default_identity_key in ssh_dir_contents:
+        typer.secho(f"No {default_identity_key} file found in {ssh_dir} directory. Please check the default_identity_key value in {str(sshu_cfg_file)}", fg=typer.colors.BRIGHT_RED)
+        typer.secho("Or create the key by running ssh-keygen", fg=typer.colors.BRIGHT_RED)
+        logging.info("The default identity key is not found in .ssh dir")
+        sys.exit()
     else:
-        logging.info("ssh key pairs already exists.")
+        logging.info("The default identity key already exists.")
    
-def initialize_sshu_config(ssh_dir):
+def initialize_sshu_config(ssh_dir: Path, sshu_cfg_dir: Path, sshu_cfg_file: Path):
 
-    sshu_cfg_dir = appdirs.user_config_dir("sshu", "FuReAsu")
     if not os.path.exists(sshu_cfg_dir):
         os.makedirs(sshu_cfg_dir)
         logging.info(f"sshu config dir doesn't exit creating.")
@@ -120,7 +133,7 @@ def initialize_sshu_config(ssh_dir):
     else:
         logging.info("sshu config dir already exists.")
     
-    sshu_cfg_file = Path(os.path.join(sshu_cfg_dir,"config.yaml"))
+    sshu_cfg_file = sshu_cfg_dir / "config.yaml" 
     if not sshu_cfg_file.exists():
         sshu_cfg_file.touch(mode=0o600)
         logging.info("Created sshu config file.")
@@ -129,7 +142,6 @@ def initialize_sshu_config(ssh_dir):
         logging.info("sshu config file already exists.")
 
     default_config: dict = {
-        "log_dir": os.path.join(appdirs.user_data_dir("sshu", "FuReAsu"),"log"),
         "default_identity_key": "id_ed25519",
         "keys_dir": str(ssh_dir / "keys"),
         "keys_scan": True
