@@ -3,7 +3,7 @@ import importlib.metadata
 import os
 import logging
 import appdirs
-import subprocess
+import yaml
 from pathlib import Path
 from sshu.conn import manager as connmanager
 from sshu.keys import manager as keysmanager
@@ -31,7 +31,7 @@ app.add_typer(keysmanager.app, name="keys", help="Manage SSH keys")
 try:
     __version__ = importlib.metadata.version("sshu")
 except importlib.metadata.PackageNotFoundError:
-    __version__ = "0.1.2-rc"
+    __version__ = "0.1.2-rc1"
 
 home_dir = Path.home()
 ssh_dir = home_dir / ".ssh"
@@ -48,12 +48,14 @@ def main(verbose: int = typer.Option(0, "--verbose", "-v", count=True)):
     
     configure_logging(stdout_level)
     initialize_ssh_config(ssh_dir)
+    initialize_sshu_config(ssh_dir)
     initialize_ssh_keys(ssh_dir)
 
 def configure_logging(stdout_level=logging.CRITICAL):
 
     log_dir = appdirs.user_data_dir("sshu", "FuReAsu")
-    os.makedirs(log_dir, exist_ok=True)
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
     log_file = os.path.join(log_dir, "sshu.log")
     
     logger = logging.getLogger()
@@ -100,17 +102,58 @@ def initialize_ssh_config(ssh_dir: Path):
 
 def initialize_ssh_keys(ssh_dir):
 
-   ssh_dir_contents = os.listdir(ssh_dir)
-   if not "id_ed25519.pub" in ssh_dir_contents:
-       process = subprocess.Popen(
-           ["ssh-keygen", "-t", "ed25519", "-f", f"{ssh_dir}/id_ed25519", "-N", ""],
-           stdin=subprocess.PIPE,
-           stdout=subprocess.PIPE,
-           stderr=subprocess.PIPE,
-           text=True
-       ) 
-       output = process.communicate(input="\n\n\n")
-       logging.debug(f"pubkey generation output -> {output}")
+    ssh_dir_contents = os.listdir(ssh_dir)
+    print(ssh_dir_contents)
+    if not "id_" in ssh_dir_contents:
+        typer.echo("No ssh key pairs that starts with id found. Please run ssh-keygen first")
+        logging.info("No public keys exists.")
+    else:
+        logging.info("ssh key pairs already exists.")
+   
+def initialize_sshu_config(ssh_dir):
+
+    sshu_cfg_dir = appdirs.user_config_dir("sshu", "FuReAsu")
+    if not os.path.exists(sshu_cfg_dir):
+        os.makedirs(sshu_cfg_dir)
+        logging.info(f"sshu config dir doesn't exit creating.")
+        logging.debug(f"sshu config dir -> {sshu_cfg_dir}.")
+    else:
+        logging.info("sshu config dir already exists.")
+    
+    sshu_cfg_file = Path(os.path.join(sshu_cfg_dir,"config.yaml"))
+    if not sshu_cfg_file.exists():
+        sshu_cfg_file.touch(mode=0o600)
+        logging.info("Created sshu config file.")
+        logging.debug(f"Created file -> {str(sshu_cfg_file)}")
+    else:
+        logging.info("sshu config file already exists.")
+
+    default_config: dict = {
+        "log_dir": os.path.join(appdirs.user_data_dir("sshu", "FuReAsu"),"log"),
+        "default_identity_key": "id_ed25519",
+        "keys_dir": str(ssh_dir / "keys"),
+        "keys_scan": True
+    }
+
+    with open(sshu_cfg_file,'r') as cfg_file:
+        cfg_data: dict = yaml.safe_load(cfg_file) or {}
+
+    new_cfg_data: dict = cfg_data
+
+    if len(cfg_data) == 0:
+        new_cfg_data = default_config
+        logging.info("No config data exists yet, populating with default values")
+    else:
+        for key in default_config.keys():
+            if not key in cfg_data.keys() or not cfg_data[key]:
+                new_cfg_data[key]=default_config[key]
+                logging.info(f"No key {key} set, setting it the default value.")
+                logging.debug(f"Key -> {key}. Value -> {cfg_data[key]}")
+            else:
+                continue
+    
+    with open(sshu_cfg_file,'w') as cfg_file:
+        yaml.safe_dump(new_cfg_data,cfg_file)
 
 @app.command()
 def ls():
