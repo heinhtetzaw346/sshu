@@ -82,7 +82,7 @@ def configure_logging(stdout_level=logging.CRITICAL):
 def initialize_ssh_config(ssh_dir: Path, sshu_cfg_file: Path):
   
     with open(sshu_cfg_file,'r') as cfg_file:
-        cfg_data = yaml.safe_load(cfg_file) or {}
+        cfg_data: dict = yaml.safe_load(cfg_file) or {}
 
     keys_dir: Path = Path(cfg_data["keys_dir"])
 
@@ -110,7 +110,7 @@ def initialize_ssh_config(ssh_dir: Path, sshu_cfg_file: Path):
 def initialize_ssh_keys(ssh_dir: Path, sshu_cfg_file: Path):
 
     with open(sshu_cfg_file,'r') as cfg_file:
-        cfg_data = yaml.safe_load(cfg_file) or {}
+        cfg_data: dict = yaml.safe_load(cfg_file) or {}
 
     default_identity_key: str = cfg_data["default_identity_key"]
 
