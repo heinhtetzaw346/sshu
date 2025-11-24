@@ -42,7 +42,7 @@ def show_version():
     try:
         __version__ = importlib.metadata.version("sshu")
     except importlib.metadata.PackageNotFoundError:
-        __version__ = "0.1.3-beta"
+        __version__ = "0.1.3-beta1"
     print(__version__)
 
 @app.callback(invoke_without_command=True)
