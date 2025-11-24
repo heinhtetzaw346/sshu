@@ -29,19 +29,31 @@ help_message = """  Manage SSH connections and keys\n
 app = typer.Typer(help = help_message,add_completion=False)
 app.add_typer(keysmanager.app, name="keys", help="Manage SSH keys")
 
-try:
-    __version__ = importlib.metadata.version("sshu")
-except importlib.metadata.PackageNotFoundError:
-    __version__ = "0.1.3-beta"
-
 home_dir = Path.home()
 ssh_dir = home_dir / ".ssh"
 sshu_marker = "#### Managed by SSHU ####"
 sshu_cfg_dir = Path(appdirs.user_config_dir("sshu", "FuReAsu"))
 sshu_cfg_file = sshu_cfg_dir / "config.yaml"
 
-@app.callback()
-def main(verbose: int = typer.Option(0, "--verbose", "-v", count=True)):
+def show_version():
+    """
+    show the current app version
+    """
+    try:
+        __version__ = importlib.metadata.version("sshu")
+    except importlib.metadata.PackageNotFoundError:
+        __version__ = "0.1.3-beta"
+    print(__version__)
+
+@app.callback(invoke_without_command=True)
+def main(
+    verbose: int = typer.Option(0, "--verbose", "-v", count=True),
+    version: bool = typer.Option(False, "--version", is_eager=True)
+    ):
+   
+    if version:
+        show_version()
+        raise typer.Exit(code=0)
     if verbose == 0:
         stdout_level = logging.CRITICAL
     elif verbose == 1:
@@ -222,13 +234,6 @@ def rm(
         typer.secho("You can't use --remote with --all option", fg=typer.colors.BRIGHT_RED, err=True)
         raise typer.Exit(code=1)
     connmanager.remove(conn_name, all, remote)
-
-@app.command()
-def version():
-    """
-    show the current app version
-    """
-    typer.echo(__version__)
 
 if __name__ == "__main__":
     app()
