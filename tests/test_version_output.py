@@ -7,7 +7,7 @@ from pathlib import Path
 runner = CliRunner()
 
 def test_cli_version():
-    result = runner.invoke(app,["version"])
+    result = runner.invoke(app,["--version"])
     project_file: Path = Path.cwd() / "pyproject.toml"
     project_file_contents = project_file.read_text().splitlines()
     version_from_file = "0.0.0"
