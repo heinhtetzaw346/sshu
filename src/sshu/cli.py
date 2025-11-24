@@ -62,9 +62,13 @@ def main(
         stdout_level = logging.DEBUG
     
     configure_logging(stdout_level)
-    initialize_sshu_config(ssh_dir,sshu_cfg_dir, sshu_cfg_file)
-    initialize_ssh_config(ssh_dir, sshu_cfg_file)
-    initialize_ssh_keys(ssh_dir, sshu_cfg_file)
+    ret = 0
+    ret |= initialize_sshu_config(ssh_dir,sshu_cfg_dir, sshu_cfg_file)
+    ret |= initialize_ssh_config(ssh_dir, sshu_cfg_file)
+    ret |= initialize_ssh_keys(ssh_dir, sshu_cfg_file)
+
+    if ret != 0:
+        sys.exit(1)
 
 def configure_logging(stdout_level=logging.CRITICAL):
 
@@ -119,6 +123,8 @@ def initialize_ssh_config(ssh_dir: Path, sshu_cfg_file: Path):
         ssh_cfg.write_text("\n".join(ssh_cfg_contents) + "\n")
         logging.debug(f"Added '{sshu_marker}' to {ssh_cfg}")
 
+    return 0
+
 def initialize_ssh_keys(ssh_dir: Path, sshu_cfg_file: Path):
 
     with open(sshu_cfg_file,'r') as cfg_file:
@@ -132,9 +138,10 @@ def initialize_ssh_keys(ssh_dir: Path, sshu_cfg_file: Path):
         typer.secho(f"No {default_identity_key} file found in {ssh_dir} directory. Please check the default_identity_key value in {str(sshu_cfg_file)}", fg=typer.colors.BRIGHT_RED)
         typer.secho("Or create the key by running ssh-keygen", fg=typer.colors.BRIGHT_RED)
         logging.info("The default identity key is not found in .ssh dir")
-        sys.exit()
+        return 1
     else:
         logging.info("The default identity key already exists.")
+        return 0
    
 def initialize_sshu_config(ssh_dir: Path, sshu_cfg_dir: Path, sshu_cfg_file: Path):
 
@@ -145,7 +152,6 @@ def initialize_sshu_config(ssh_dir: Path, sshu_cfg_dir: Path, sshu_cfg_file: Pat
     else:
         logging.info("sshu config dir already exists.")
     
-    sshu_cfg_file = sshu_cfg_dir / "config.yaml" 
     if not sshu_cfg_file.exists():
         sshu_cfg_file.touch(mode=0o600)
         logging.info("Created sshu config file.")
@@ -178,6 +184,8 @@ def initialize_sshu_config(ssh_dir: Path, sshu_cfg_dir: Path, sshu_cfg_file: Pat
     
     with open(sshu_cfg_file,'w') as cfg_file:
         yaml.safe_dump(new_cfg_data,cfg_file)
+
+    return 0
 
 @app.command()
 def ls():
