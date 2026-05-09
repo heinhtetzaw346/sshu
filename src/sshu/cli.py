@@ -9,6 +9,8 @@ from pathlib import Path
 from sshu.conn import manager as connmanager
 from sshu.keys import manager as keysmanager
 
+logger = logging.getLogger(__name__)
+
 help_message = """  Manage SSH connections and keys\n
                     Examples\n
                     sshu add --passwd --copyid sysadmin@192.168.1.25 db_server\n
@@ -82,7 +84,7 @@ def configure_logging(stdout_level=logging.CRITICAL):
 
     file_handler = logging.FileHandler(log_file)
     file_handler.setLevel(logging.DEBUG)
-    file_format = logging.Formatter("%(asctime)s - %(levelname)s - %(message)s")
+    file_format = logging.Formatter("%(asctime)s - [%(module)s] - %(levelname)s - %(message)s")
     file_handler.setFormatter(file_format)
 
     stdout_handler = logging.StreamHandler()
@@ -105,15 +107,15 @@ def initialize_ssh_config(ssh_dir: Path, sshu_cfg_file: Path):
     ssh_cfg = ssh_dir / "config"
     if not ssh_dir.exists():
         ssh_dir.mkdir(mode=0o700)
-        logging.debug(f"Created {ssh_dir} with permission 700")
+        logger.debug(f"Created {ssh_dir} with permission 700")
 
     if not keys_dir.exists():
         keys_dir.mkdir(mode=0o700)
-        logging.debug(f"Created {keys_dir} with permission 700")
+        logger.debug(f"Created {keys_dir} with permission 700")
 
     if not ssh_cfg.exists():
         ssh_cfg.touch(mode=0o600)
-        logging.debug(f"Created {ssh_cfg} with permission 600")
+        logger.debug(f"Created {ssh_cfg} with permission 600")
     
     ssh_cfg_contents = ssh_cfg.read_text().splitlines()
 
@@ -121,7 +123,7 @@ def initialize_ssh_config(ssh_dir: Path, sshu_cfg_file: Path):
         ssh_cfg_contents.append("\n")
         ssh_cfg_contents.append(sshu_marker)
         ssh_cfg.write_text("\n".join(ssh_cfg_contents) + "\n")
-        logging.debug(f"Added '{sshu_marker}' to {ssh_cfg}")
+        logger.debug(f"Added '{sshu_marker}' to {ssh_cfg}")
 
     return 0
 
@@ -133,31 +135,31 @@ def initialize_ssh_keys(ssh_dir: Path, sshu_cfg_file: Path):
     default_identity_key: str = cfg_data["default_identity_key"]
 
     ssh_dir_contents = os.listdir(ssh_dir)
-    logging.debug(f"ssh dir contents -> {ssh_dir_contents}")
+    logger.debug(f"ssh dir contents -> {ssh_dir_contents}")
     if not default_identity_key in ssh_dir_contents:
         typer.secho(f"No {default_identity_key} file found in {ssh_dir} directory. Please check the default_identity_key value in {str(sshu_cfg_file)}", fg=typer.colors.BRIGHT_RED)
         typer.secho("Or create the key by running ssh-keygen", fg=typer.colors.BRIGHT_RED)
-        logging.info("The default identity key is not found in .ssh dir")
+        logger.info("The default identity key is not found in .ssh dir")
         return 1
     else:
-        logging.info("The default identity key already exists.")
+        logger.info("The default identity key already exists.")
         return 0
    
 def initialize_sshu_config(ssh_dir: Path, sshu_cfg_dir: Path, sshu_cfg_file: Path):
 
     if not os.path.exists(sshu_cfg_dir):
         os.makedirs(sshu_cfg_dir)
-        logging.info(f"sshu config dir doesn't exit creating.")
-        logging.debug(f"sshu config dir -> {sshu_cfg_dir}.")
+        logger.info(f"sshu config dir doesn't exit creating.")
+        logger.debug(f"sshu config dir -> {sshu_cfg_dir}.")
     else:
-        logging.info("sshu config dir already exists.")
+        logger.info("sshu config dir already exists.")
     
     if not sshu_cfg_file.exists():
         sshu_cfg_file.touch(mode=0o600)
-        logging.info("Created sshu config file.")
-        logging.debug(f"Created file -> {str(sshu_cfg_file)}")
+        logger.info("Created sshu config file.")
+        logger.debug(f"Created file -> {str(sshu_cfg_file)}")
     else:
-        logging.info("sshu config file already exists.")
+        logger.info("sshu config file already exists.")
 
     default_config: dict = {
         "default_identity_key": "id_ed25519",
@@ -172,13 +174,13 @@ def initialize_sshu_config(ssh_dir: Path, sshu_cfg_dir: Path, sshu_cfg_file: Pat
 
     if len(cfg_data) == 0:
         new_cfg_data = default_config
-        logging.info("No config data exists yet, populating with default values")
+        logger.info("No config data exists yet, populating with default values")
     else:
         for key in default_config.keys():
             if not key in cfg_data.keys() or not cfg_data[key]:
                 new_cfg_data[key]=default_config[key]
-                logging.info(f"No key {key} set, setting it the default value.")
-                logging.debug(f"Key -> {key}. Value -> {cfg_data[key]}")
+                logger.info(f"No key {key} set, setting it the default value.")
+                logger.debug(f"Key -> {key}. Value -> {cfg_data[key]}")
             else:
                 continue
     

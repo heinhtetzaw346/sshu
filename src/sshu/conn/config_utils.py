@@ -2,10 +2,13 @@ import typer
 from pathlib import Path
 import sys
 import os
+import logging
 
 sshu_marker = "#### Managed by SSHU ####"
+logger = logging.getLogger(__name__)
 
 def parse_cfg_for_list(ssh_cfg: Path, FIELDS: list):
+    logger.debug(f"Parsing config file -> {ssh_cfg} for list fields -> {FIELDS}")
     host_block_list = []
     host_block = {}
     with ssh_cfg.open() as f:
@@ -38,10 +41,11 @@ def parse_cfg_for_list(ssh_cfg: Path, FIELDS: list):
         if host_block:
             host_block_list.append(host_block)
 
+    logger.debug(f"Found host blocks count -> {len(host_block_list)}")
     return host_block_list
 
-
 def add_conn_to_cfg(host_cfg: str, ssh_cfg: Path):
+    logger.debug("Appending new host block to config file.")
 
     ssh_cfg_content = ssh_cfg.read_text().splitlines()
     ssh_cfg_content.append(host_cfg)
@@ -49,7 +53,7 @@ def add_conn_to_cfg(host_cfg: str, ssh_cfg: Path):
 
 
 def conn_name_exists(conn_name: str, ssh_cfg: Path):
-    
+    logger.debug(f"Checking if connection '{conn_name}' exists.")
     ssh_cfg_content = ssh_cfg.read_text().splitlines()
     conn_name_list = []
 
@@ -65,10 +69,11 @@ def conn_name_exists(conn_name: str, ssh_cfg: Path):
 
 
 def remove_conn_from_cfg(conn_name: str, ssh_cfg: Path):
-
+    logger.debug(f"Removing connection block '{conn_name}' from config.")
     ssh_cfg_content = ssh_cfg.read_text().splitlines()
 
     if sshu_marker not in ssh_cfg_content:
+        logger.error("There are no sshu managed connections yet.")
         typer.secho("There are no sshu managed connections yet", fg=typer.colors.BRIGHT_RED)
         sys.exit(1)
 
@@ -79,6 +84,7 @@ def remove_conn_from_cfg(conn_name: str, ssh_cfg: Path):
     try:
         conn_name_index = managed_content.index("Host " + conn_name)
     except ValueError:
+        logger.error(f"The connection {conn_name} is not managed by sshu.")
         typer.secho(f"The connection {conn_name} is not managed by sshu", fg=typer.colors.BRIGHT_RED)
         sys.exit(1)
 
@@ -95,11 +101,12 @@ def remove_conn_from_cfg(conn_name: str, ssh_cfg: Path):
 
 
 def remove_all_conn_from_cfg(ssh_cfg: Path):
-
+    logger.debug("Removing all sshu managed connections from config.")
     ssh_cfg_content = ssh_cfg.read_text().splitlines()
     ssh_cfg_str = "\n".join(ssh_cfg_content)
 
     if sshu_marker not in ssh_cfg_content:
+        logger.warning("No sshu configurations found to delete.")
         typer.secho("No sshu configurations found to delete", fg=typer.colors.BRIGHT_RED)
         sys.exit()
 
@@ -118,7 +125,9 @@ def add_key_to_keys_dir(keypair_to_add: Path, keys_dir: Path):
     if not new_key_file.exists():
         new_key_file.touch(mode=0o600)
         new_key_file.write_text(key_file_content)
+        logger.info(f"Copied '{keyfile}' to the keys directory.")
         typer.echo(f"Copied {keyfile} to the keys directory")
     else:
+        logger.info(f"Key '{keyfile}' already exists in the keys directory.")
         typer.echo(f"{keyfile} already exists in the keys directory")
     return new_key_file
