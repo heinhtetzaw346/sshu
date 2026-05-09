@@ -23,7 +23,7 @@ sshu is not OS specific if installed with pip.
 You can find all official releases on the [Releases page](../../releases).
 
 ### Dev Binaries
-For latest dev binaries, you can head over to [https://github.com/FuReAsu/sshu/actions/workflows/dev-build-binaries.yaml](https://github.com/FuReAsu/sshu/actions/workflows/dev-build-binaries.yaml) </br>
+For latest dev binaries, you can head over to [https://github.com/FuReAsu/sshu/actions/workflows/ci-cd.yaml](https://github.com/FuReAsu/sshu/actions/workflows/ci-cd.yaml) </br>
 You can click on a pipeline, download the binaries and use them as you like.
 
 ### Test Pypi
@@ -68,9 +68,9 @@ Currently only the main sshu cli app is working, keys haven't been worked on.
 All working commands:
 
 - sshu ls
-- sshu add --passwd user@hostname connection_name
-- sshu add --passwd --copyid user@hostname connection_name
-- sshu add --keypair /path/to/key user@hostname connection_name
+- sshu add connection_name -u user -a hostname --passwd
+- sshu add connection_name -u user -a hostname --passwd --copyid
+- sshu add connection_name -u user -a hostname --keypair /path/to/key
 - sshu rm connection_name
 - sshu rm --remote connection_name
 - sshu rm --all
@@ -83,6 +83,10 @@ Below are what I used in sshu:
 - Python 3.12
 - Typer for cli app
 - Fabric for remote command execution over ssh connection
+
+## Logging
+
+SSHU logs background activity and debugging information to help you trace actions and troubleshoot errors. The log file is located at the app user data directory, typically `~/.local/share/sshu/FuReAsu/sshu.log` on Linux.
 
 ## Build it yourself
 
