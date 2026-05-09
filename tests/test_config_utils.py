@@ -1,5 +1,6 @@
 from sshu.conn.config_utils import add_conn_to_cfg, conn_name_exists, parse_cfg_for_list, add_key_to_keys_dir, remove_all_conn_from_cfg, remove_conn_from_cfg
 from pathlib import Path
+import pytest
 
 def test_add_new_conn(temp: tuple):
     ssh_cfg: Path = temp[0] 
@@ -87,3 +88,35 @@ djapoupoefpoaifoapfkoefkopefopeidajdajdddd
 
     new_keypair = keys_dir / "unittestkey.pem"
     assert new_keypair.exists() and new_keypair.read_text() == privkey
+
+def test_remove_conn_no_glob_match(temp: tuple):
+    ssh_cfg: Path = temp[0]
+    
+    # Add a host with a similar name
+    ssh_cfg.write_text(ssh_cfg.read_text() + "\nHost unittest-dev\n  HostName py\n  User test\n  Port 22\n")
+    
+    # Remove unittest
+    remove_conn_from_cfg("unittest", ssh_cfg)
+    
+    ssh_cfg_content = ssh_cfg.read_text()
+    
+    # unittest should be gone
+    assert "Host unittest\n" not in ssh_cfg_content
+    # unittest-dev should STILL be there
+    assert "Host unittest-dev\n" in ssh_cfg_content
+
+def test_remove_conn_above_marker_aborts(temp: tuple):
+    ssh_cfg: Path = temp[0]
+    
+    # Re-write config to put a host ABOVE the marker
+    ssh_cfg.write_text("Host unmanaged\n  HostName unmanaged.test\n\n" + ssh_cfg.read_text())
+    
+    # Removing 'unmanaged' should trigger a SystemExit(1)
+    with pytest.raises(SystemExit) as exc_info:
+        remove_conn_from_cfg("unmanaged", ssh_cfg)
+        
+    assert exc_info.value.code == 1
+    
+    # Verify it was NOT deleted
+    ssh_cfg_content = ssh_cfg.read_text()
+    assert "Host unmanaged\n" in ssh_cfg_content
