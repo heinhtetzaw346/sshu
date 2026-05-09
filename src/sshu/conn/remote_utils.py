@@ -5,6 +5,9 @@ from fabric import Connection
 import sys
 import appdirs
 import yaml
+import logging
+
+logger = logging.getLogger(__name__)
 
 home_dir = Path.home()
 ssh_dir = home_dir / ".ssh"
@@ -15,6 +18,8 @@ sshu_cfg_dir = Path(appdirs.user_config_dir("sshu", "FuReAsu"))
 sshu_cfg_file = sshu_cfg_dir / "config.yaml"
 
 def copy_pubkey_to_remote(hostname:str, user:str, port:str, retries: int):
+    logger.debug(f"Target for pubkey copy -> {user}@{hostname}:{port}")
+
 
     with open(sshu_cfg_file,'r') as cfg_file:
         cfg_data: dict = yaml.safe_load(cfg_file)
@@ -38,6 +43,9 @@ def copy_pubkey_to_remote(hostname:str, user:str, port:str, retries: int):
     try:
         check_create_ssh_dir = conn.run("mkdir -p $HOME/.ssh && chmod -R 700 $HOME/.ssh", warn=True)
         if check_create_ssh_dir.return_code != 0:
+            logger.error("Creating ssh dir failed on remote host.")
+            logger.debug(f"Remote STDOUT -> {check_create_ssh_dir.stdout.strip()}")
+            logger.debug(f"Remote STDERR -> {check_create_ssh_dir.stderr.strip()}")
             typer.echo("Creating ssh dir failed on remote host")
             typer.echo(f"Remote STDOUT: {check_create_ssh_dir.stdout.strip()}\n\nremote STDERR: {check_create_ssh_dir.stderr.strip()} ")
 
@@ -47,6 +55,9 @@ def copy_pubkey_to_remote(hostname:str, user:str, port:str, retries: int):
             create_authorized_keys = conn.run("touch $HOME/.ssh/authorized_keys && chmod 600 $HOME/.ssh/authorized_keys")
 
             if create_authorized_keys.return_code != 0:
+                logger.error("Creating authorized_keys file failed.")
+                logger.debug(f"Remote STDOUT -> {create_authorized_keys.stdout.strip()}")
+                logger.debug(f"Remote STDERR -> {create_authorized_keys.stderr.strip()}")
                 typer.echo("Creating authorized_keys file failed")
                 typer.echo(f"Remote STDOUT: {create_authorized_keys.stdout.strip()}\n\nremote STDERR: {create_authorized_keys.stderr.strip()} ")
 
@@ -54,40 +65,54 @@ def copy_pubkey_to_remote(hostname:str, user:str, port:str, retries: int):
         if pubkey.strip() not in check_pub_key.stdout.strip():
             insert_pub_key = conn.run(f"echo '{pubkey}' >> $HOME/.ssh/authorized_keys", warn=True) 
             if insert_pub_key.return_code != 0:
+                logger.error("Inserting pubkey failed.")
+                logger.debug(f"Remote STDOUT -> {insert_pub_key.stdout.strip()}")
+                logger.debug(f"Remote STDERR -> {insert_pub_key.stderr.strip()}")
                 typer.echo("Inserting pubkey failed")
                 typer.echo(f"Remote STDOUT: {insert_pub_key.stdout.strip()}\n\nremote STDERR: {insert_pub_key.stderr.strip()} ")
             else:
+                logger.info(f"Successfully copied public key to '{hostname}'.")
                 typer.echo("Public key copied")
         else:
+            logger.info(f"Public key already exists in authorized_keys for '{hostname}'.")
             typer.echo("Pubkey already copied into remote authorized_keys")
 
     except Exception as e:
+        logger.error(f"Error copying pubkey -> {e}")
         typer.secho(f"Error: {type(e).__name__} – {e}", fg=typer.colors.BRIGHT_RED)
 
         if retries > 0:
+            logger.warning(f"Retrying connection to '{hostname}'... {retries} retries left.")
             typer.echo(f"Retrying host [{hostname}] {retries} retries left...")
             copy_pubkey_to_remote(hostname,user,port,retries - 1)
         else:
+            logger.error(f"Failed to copy pubkey to '{hostname}' after multiple retries.")
             typer.echo(f"host [{hostname}] failed after multiple retries")
             sys.exit()
 
 
-def remove_pubkey_from_remote(conn_name:str, ssh_cfg_content, retries):
-    
+def remove_pubkey_from_remote(conn_name:str, ssh_cfg: Path, retries: int):
+    logger.debug(f"Target connection for remote pubkey removal -> {conn_name}")
     keyed_line = "#Keyed yes"
 
-    host_block_to_delete = []
-    conn_name_index = ssh_cfg_content.index("Host " + conn_name)
+    ssh_cfg_content = ssh_cfg.read_text().splitlines()
 
-    for line in ssh_cfg_content[conn_name_index::]:
-        if line.startswith('Host') and conn_name not in line:
-            break
-        if not line.strip():
-            continue
-        else:
-            host_block_to_delete.append(line.strip())
+    host_block_to_delete = []
+    
+    try:
+        conn_name_index = ssh_cfg_content.index("Host " + conn_name)
+        for line in ssh_cfg_content[conn_name_index::]:
+            if line.startswith('Host ') and conn_name not in line:
+                break
+            if not line.strip():
+                continue
+            else:
+                host_block_to_delete.append(line.strip())
+    except ValueError:
+        pass
 
     if keyed_line not in host_block_to_delete:
+        logger.warning(f"Connection '{conn_name}' is not keyed. Aborting remote removal.")
         typer.secho("This connection is not keyed, there is no public key to delete on the remote host...", fg=typer.colors.BRIGHT_RED)
         typer.echo("Please remove the --remote flag to delete the selected connection...")
         sys.exit()
@@ -112,6 +137,8 @@ def remove_pubkey_from_remote(conn_name:str, ssh_cfg_content, retries):
             get_authorized_keys = conn.run(f"cat $HOME/.ssh/authorized_keys", hide=True , warn=True)
 
             if get_authorized_keys.return_code != 0:
+                logger.error("Getting the authorized_keys file on remote host failed.")
+                logger.debug(f"Remote STDERR -> {get_authorized_keys.stderr.strip()}")
                 typer.secho("Getting the authorized_keys file on remote host failed...", fg=typer.colors.BRIGHT_RED)
                 typer.secho(f"ERROR - {get_authorized_keys.stderr.strip()}", fg=typer.colors.BRIGHT_RED)
                 sys.exit()
@@ -121,12 +148,16 @@ def remove_pubkey_from_remote(conn_name:str, ssh_cfg_content, retries):
             update_authorized_keys = conn.run(f"echo '{remote_authorized_keys}' > $HOME/.ssh/authorized_keys", hide=True, warn=True)
 
             if update_authorized_keys.return_code != 0:
+                logger.error("Removing the pubkey from the remote host failed.")
+                logger.debug(f"Remote STDERR -> {update_authorized_keys.stderr.strip()}")
                 typer.secho("Removing the pubkey from the remote host failed, aborting the remove action...", fg=typer.colors.BRIGHT_RED)
                 typer.secho(f"ERROR - {update_authorized_keys.stderr.strip()}", fg=typer.colors.BRIGHT_RED)
                 sys.exit()
-            typer.echo(f"Public key successfully deleted from {host_info["HostName"]}")
+            logger.info(f"Successfully deleted public key from '{host_info['HostName']}'.")
+            typer.echo(f"Public key successfully deleted from {host_info['HostName']}")
 
         except Exception as e:
+            logger.error(f"Error removing pubkey -> {e}")
             typer.secho(f"Error: {type(e).__name__} – {e}", fg=typer.colors.BRIGHT_RED)
             
             if retries > 0:
@@ -134,10 +165,13 @@ def remove_pubkey_from_remote(conn_name:str, ssh_cfg_content, retries):
                 while confirmation not in ("y","n"):
                     confirmation = input("Retry? Y/n: ").strip().lower() or "y"
                 if confirmation == "n":
+                    logger.info("User aborted retry for remote pubkey removal.")
                     sys.exit()
                 elif confirmation == "y":
-                    typer.echo(f"Retrying pubkey removal from [{host_info["HostName"]}] {retries} retries left... ")
-                    remove_pubkey_from_remote(conn_name, ssh_cfg_content, retries -1)
+                    logger.warning(f"Retrying pubkey removal from '{host_info['HostName']}'... {retries} retries left.")
+                    typer.echo(f"Retrying pubkey removal from [{host_info['HostName']}] {retries} retries left... ")
+                    remove_pubkey_from_remote(conn_name, ssh_cfg, retries -1)
             else:
-                typer.echo(f"host [{host_info["HostName"]}] failed after multiple retries")
+                logger.error(f"Failed to remove pubkey from '{host_info['HostName']}' after multiple retries.")
+                typer.echo(f"host [{host_info['HostName']}] failed after multiple retries")
                 sys.exit()
