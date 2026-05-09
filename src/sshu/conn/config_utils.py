@@ -67,20 +67,31 @@ def conn_name_exists(conn_name: str, ssh_cfg: Path):
 def remove_conn_from_cfg(conn_name: str, ssh_cfg: Path):
 
     ssh_cfg_content = ssh_cfg.read_text().splitlines()
-    ssh_cfg_str = "\n".join(ssh_cfg_content)
 
-    host_block_to_delete = []
-    conn_name_index = ssh_cfg_content.index("Host " + conn_name)
+    if sshu_marker not in ssh_cfg_content:
+        typer.secho("There are no sshu managed connections yet", fg=typer.colors.BRIGHT_RED)
+        sys.exit(1)
 
-    for line in ssh_cfg_content[conn_name_index::]:
-        if line.startswith('Host') and conn_name not in line:
+    marker_index = ssh_cfg_content.index(sshu_marker)
+    before_marker = ssh_cfg_content[:marker_index + 1]
+    managed_content = ssh_cfg_content[marker_index + 1:]
+
+    try:
+        conn_name_index = managed_content.index("Host " + conn_name)
+    except ValueError:
+        typer.secho(f"The connection {conn_name} is not managed by sshu", fg=typer.colors.BRIGHT_RED)
+        sys.exit(1)
+
+    host_end_index = conn_name_index + 1
+    for line in managed_content[conn_name_index + 1:]:
+        if line.startswith('Host '):
             break
-        else:
-            host_block_to_delete.append(line)
+        host_end_index += 1
 
-    host_block_to_delete_str = "\n".join(host_block_to_delete)
-    ssh_cfg_str = ssh_cfg_str.replace(host_block_to_delete_str,"")
-    ssh_cfg.write_text(ssh_cfg_str)
+    del managed_content[conn_name_index:host_end_index]
+    
+    new_content = before_marker + managed_content
+    ssh_cfg.write_text("\n".join(new_content) + "\n")
 
 
 def remove_all_conn_from_cfg(ssh_cfg: Path):
