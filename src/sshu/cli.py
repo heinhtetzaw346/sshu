@@ -13,19 +13,19 @@ logger = logging.getLogger(__name__)
 
 help_message = """  Manage SSH connections and keys\n
                     Examples\n
-                    sshu add --passwd --copyid sysadmin@192.168.1.25 db_server\n
-                    sshu add --keypair ~/.ssh/Web_Server_Key.pem sysadmin@192.168.1.50 web_server\n
+                    sshu add db_server -u sysadmin -a 192.168.1.25 --passwd --copyid\n
+                    sshu add web_server -u sysadmin -a 192.168.1.50 --keypair ~/.ssh/Web_Server_Key.pem\n
                     sshu ls\n
                     sshu rm web_server\n
                     sshu rm --remote db_server\n
                     \n
                     You can also use short forms of the options\n
-                    sshu add -P -c sysadmin@192.168.1.25 db_server\n
-                    sshu add -k ~/.ssh/Web_Server_Key.pem sysadmin@192.168.1.50 web_server\n
+                    sshu add db_server -u sysadmin -a 192.168.1.25 -P -c\n
+                    sshu add web_server -u sysadmin -a 192.168.1.50 -k ~/.ssh/Web_Server_Key.pem\n
                     sshu rm -r db_server\n
                     \n
                     You can also specify ports for non default ssh ports by using --port or -p\n
-                    sshu add --port 8282 --keypair ~/.ssh/Web_Server_Key.pem sysadmin@192.168.1.50 web_server
+                    sshu add web_server -u sysadmin -a 192.168.1.50 --port 8282 --keypair ~/.ssh/Web_Server_Key.pem
                """
 
 app = typer.Typer(help = help_message,add_completion=False)
@@ -206,8 +206,9 @@ def ls():
 
 @app.command()
 def add(
-    address_string: str = typer.Argument(..., help="SSH address string to the remote server eg. user@server.com"),
     conn_name: str = typer.Argument(..., help="SSH connection name to save eg. server1"),
+    user: str = typer.Option(..., "--user", "-u", help="SSH user name"),
+    address: str = typer.Option(..., "--address", "-a", help="SSH server address (IP or Hostname)"),
     passwd: bool = typer.Option(False, "--passwd", "-P", help="use password authentication"),
     copyid: bool = typer.Option(False, "--copyid", "-c", help="perform ssh-copy-id to the remote server"),
     keypair: str = typer.Option(None, "--keypair", "-k", help="use keypair authentication and provide a private key"),
@@ -229,7 +230,7 @@ def add(
         typer.secho("--keypair and --copyid can't be used together", fg=typer.colors.BRIGHT_RED, err=True)
         raise typer.Exit(code=1)
 
-    connmanager.add(address_string,conn_name,passwd,copyid,keypair, port)
+    connmanager.add(conn_name, user, address, passwd, copyid, keypair, port)
 
 @app.command()
 def rm(

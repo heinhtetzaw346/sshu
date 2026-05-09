@@ -15,7 +15,7 @@ keys_dir = ssh_dir / "keys"
 
 logger = logging.getLogger(__name__)
 
-def add(address_string: str, conn_name: str, passwd: bool, copyid: bool, keypair: str, port: str):
+def add(conn_name: str, user: str, address: str, passwd: bool, copyid: bool, keypair: str, port: str):
     logger.debug(f"Target connection name -> {conn_name}")
 
     if conn_name_exists(conn_name, ssh_cfg):
@@ -23,14 +23,13 @@ def add(address_string: str, conn_name: str, passwd: bool, copyid: bool, keypair
         typer.secho(f"Connection {conn_name} already exists", fg=typer.colors.BRIGHT_RED)
         sys.exit()
 
-    user,hostname = address_string.split('@')
-    logger.debug(f"Parsed hostname -> {hostname}, user -> {user}")
-    host_cfg = f"Host {conn_name}\n  HostName {hostname}\n  User {user}\n  Port {port}\n"
+    logger.debug(f"Parsed hostname -> {address}, user -> {user}")
+    host_cfg = f"Host {conn_name}\n  HostName {address}\n  User {user}\n  Port {port}\n"
     
     if passwd:
         if copyid:
-            typer.echo(f"Copying public key to [{hostname}] for {conn_name}")
-            copy_pubkey_to_remote(hostname,user,port,retries=3)
+            typer.echo(f"Copying public key to [{address}] for {conn_name}")
+            copy_pubkey_to_remote(address,user,port,retries=3)
             host_cfg = host_cfg + "  #Keyed yes\n"
     
     if keypair:
