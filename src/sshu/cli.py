@@ -34,7 +34,7 @@ app.add_typer(keysmanager.app, name="keys", help="Manage SSH keys")
 home_dir = Path.home()
 ssh_dir = home_dir / ".ssh"
 sshu_marker = "#### Managed by SSHU ####"
-sshu_cfg_dir = Path(appdirs.user_config_dir("sshu", "FuReAsu"))
+sshu_cfg_dir = Path(appdirs.user_config_dir("sshu"))
 sshu_cfg_file = sshu_cfg_dir / "config.yaml"
 
 def show_version():
@@ -74,7 +74,7 @@ def main(
 
 def configure_logging(stdout_level=logging.CRITICAL):
 
-    log_dir = appdirs.user_data_dir("sshu", "FuReAsu")
+    log_dir = appdirs.user_data_dir("sshu")
     if not os.path.exists(log_dir):
         os.makedirs(log_dir)
     log_file = os.path.join(log_dir, "sshu.log")
