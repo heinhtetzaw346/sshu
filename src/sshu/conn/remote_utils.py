@@ -3,7 +3,10 @@ import getpass
 from pathlib import Path
 from fabric import Connection
 import sys
+import os
 import logging
+from paramiko.client import AutoAddPolicy
+from paramiko.ssh_exception import AuthenticationException
 from .config_utils import get_sshu_config
 
 logger = logging.getLogger(__name__)
@@ -12,6 +15,66 @@ home_dir = Path.home()
 ssh_dir = home_dir / ".ssh"
 ssh_cfg = ssh_dir / "config"
 sshu_marker = "#### Managed by SSHU ####"
+
+class DiskSavingAutoAddPolicy(AutoAddPolicy):
+    def missing_host_key(self, client, hostname, key):
+        logger.debug(f"Raw paramiko hostname -> {hostname}")
+        
+        cleaned_hostname = hostname
+        if hostname.startswith("[") and "]" in hostname:
+            cleaned_hostname = hostname.split("]")[0].replace("[","")
+        logger.debug(f"Cleaned paramiko hostname -> {cleaned_hostname}")
+
+        client.get_host_keys().add(cleaned_hostname, key.get_name(), key)
+
+        known_hosts_path = os.path.expanduser("~/.ssh/known_hosts")
+        os.makedirs(os.path.dirname(known_hosts_path), exist_ok=True)
+        client.save_host_keys(known_hosts_path)
+        logger.debug(f"keys_scan enabled: Saved host key for {cleaned_hostname} to disk.")
+
+def host_key_scan(hostname: str, user: str, port: str, retries: int):
+    
+    conn = Connection(
+        host=hostname,
+        user=user,
+        port=port,
+    )
+    if conn.client is not None:
+        try: 
+            logger.info("Trying to first load system known_hosts file")
+            conn.client.load_system_host_keys()
+        except IOError:
+            logger.info("Counldn't load system known_hosts file. Skipping...")
+        conn.client.set_missing_host_key_policy(DiskSavingAutoAddPolicy())
+
+    try:
+        logger.info(f"Scanning host key for '{hostname}'...")
+        conn.open()
+        logger.debug(f"Host key scan for '{hostname}' completed successfully.")
+    except AuthenticationException:
+        logger.debug(f"Host key scan for '{hostname}' completed (AuthenticationException as expected).")
+    except Exception as e:
+        logger.error(f"Error scanning host key -> {e}")
+        typer.secho(f"Error during host key scan: {type(e).__name__} – {e}", fg=typer.colors.BRIGHT_RED)
+        
+        if retries > 0:
+            confirmation: str = ""
+            while confirmation not in ("y", "n"):
+                confirmation = input("Retry host key scan? Y/n: ").strip().lower() or "y"
+            if confirmation == "n":
+                logger.info("User aborted retry for host key scan.")
+                sys.exit()
+            elif confirmation == "y":
+                logger.warning(f"Retrying host key scan for '{hostname}'... {retries} retries left.")
+                typer.echo(f"Retrying host key scan for [{hostname}] {retries} retries left... ")
+                host_key_scan(hostname, user, port, retries - 1)
+        else:
+            logger.error(f"Failed to scan host key for '{hostname}' after multiple retries.")
+            typer.echo(f"host [{hostname}] failed after multiple retries")
+            sys.exit()
+    finally:
+        if conn.is_connected:
+            conn.close()
 
 def copy_pubkey_to_remote(hostname:str, user:str, port:str, retries: int):
     logger.debug(f"Target for pubkey copy -> {user}@{hostname}:{port}")
