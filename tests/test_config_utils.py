@@ -1,4 +1,4 @@
-from sshu.conn.config_utils import add_conn_to_cfg, conn_name_exists, parse_cfg_for_list, add_key_to_keys_dir, remove_all_conn_from_cfg, remove_conn_from_cfg
+from sshu.conn.config_utils import add_conn_to_cfg, conn_name_exists, parse_cfg_for_list, add_key_to_keys_dir, remove_all_conn_from_cfg, remove_conn_from_cfg, get_sshu_config
 from pathlib import Path
 import pytest
 
@@ -120,3 +120,31 @@ def test_remove_conn_above_marker_aborts(temp: tuple):
     # Verify it was NOT deleted
     ssh_cfg_content = ssh_cfg.read_text()
     assert "Host unmanaged\n" in ssh_cfg_content
+
+def test_get_sshu_config_exists(monkeypatch, tmp_path):
+    # Mock the config dir
+    monkeypatch.setattr("sshu.conn.config_utils.appdirs.user_config_dir", lambda x: str(tmp_path))
+    
+    # Create the mock config file
+    config_file = tmp_path / "config.yaml"
+    config_file.write_text("keys_scan: true\ndefault_identity_key: id_rsa")
+    
+    config = get_sshu_config()
+    assert config == {"keys_scan": True, "default_identity_key": "id_rsa"}
+
+def test_get_sshu_config_not_exists(monkeypatch, tmp_path):
+    # Mock the config dir where the file doesn't exist
+    monkeypatch.setattr("sshu.conn.config_utils.appdirs.user_config_dir", lambda x: str(tmp_path))
+    
+    config = get_sshu_config()
+    assert config == {}
+
+def test_get_sshu_config_empty(monkeypatch, tmp_path):
+    # Mock the config dir and create an empty file
+    monkeypatch.setattr("sshu.conn.config_utils.appdirs.user_config_dir", lambda x: str(tmp_path))
+    
+    config_file = tmp_path / "config.yaml"
+    config_file.touch()
+    
+    config = get_sshu_config()
+    assert config == {}
