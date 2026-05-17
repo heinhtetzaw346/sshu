@@ -4,8 +4,8 @@ from rich.table import Table
 from rich.console import Console
 import sys
 import logging
-from .config_utils import add_conn_to_cfg, parse_cfg_for_list, conn_name_exists, remove_conn_from_cfg, remove_all_conn_from_cfg, add_key_to_keys_dir, get_sshu_config
-from .remote_utils import copy_pubkey_to_remote, remove_pubkey_from_remote, host_key_scan
+from .config_utils import add_conn_to_cfg, parse_cfg_for_list, conn_name_exists, remove_conn_from_cfg, remove_all_conn_from_cfg, add_key_to_keys_dir
+from .remote_utils import copy_pubkey_to_remote, remove_pubkey_from_remote
 
 home_dir = Path.home()
 ssh_dir = home_dir / ".ssh"
@@ -22,13 +22,6 @@ def add(conn_name: str, user: str, address: str, passwd: bool, copyid: bool, key
         logger.warning(f"Addition aborted: Connection '{conn_name}' already exists.")
         typer.secho(f"Connection {conn_name} already exists", fg=typer.colors.BRIGHT_RED)
         sys.exit()
-
-    cfg_data = get_sshu_config()
-    if cfg_data.get("keys_scan", True) is True:
-        typer.echo(f"Scanning host key for [{address}]")
-        host_key_scan(hostname=address, user=user, port=port, retries=3)
-    else:
-        logger.debug("keys_scan disabled in config. Skipping host key scan flow.")
 
     logger.debug(f"Parsed hostname -> {address}, user -> {user}")
     host_cfg = f"Host {conn_name}\n  HostName {address}\n  User {user}\n  Port {port}\n"
