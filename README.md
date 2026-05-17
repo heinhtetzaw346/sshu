@@ -86,7 +86,7 @@ Below are what I used in sshu:
 
 ## Logging
 
-SSHU logs background activity and debugging information to help you trace actions and troubleshoot errors. The log file is located at the app user data directory, typically `~/.local/share/sshu/FuReAsu/sshu.log` on Linux.
+SSHU logs background activity and debugging information to help you trace actions and troubleshoot errors. The log file is located at the app user data directory, typically `~/.local/share/sshu/sshu.log` on Linux.
 
 ## Build it yourself
 
