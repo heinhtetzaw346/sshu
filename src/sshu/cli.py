@@ -218,6 +218,10 @@ def add(
     add new ssh connections
     """
 
+    if not conn_name or conn_name == None:
+        typer.secho("Invalid Arugment! You have to provide [ connection name ]", fg=typer.colors.BRIGHT_RED, err=True)
+        raise typer.Exit(code=1)
+
     if passwd and keypair:
         typer.secho("You can't use both --passwd and --keypair please use only one authentication option", fg=typer.colors.BRIGHT_RED, err=True)
         raise typer.Exit(code=1)
@@ -241,6 +245,11 @@ def rm(
     """
     remove ssh connections
     """
+
+    if not all and (not conn_name or conn_name == None):
+        typer.secho("Invalid Arugment! You have to provide [ connection name ]", fg=typer.colors.BRIGHT_RED, err=True)
+        raise typer.Exit(code=1)
+
     if all and remote:
         typer.secho("You can't use --remote with --all option", fg=typer.colors.BRIGHT_RED, err=True)
         raise typer.Exit(code=1)
