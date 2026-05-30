@@ -4,8 +4,8 @@ from rich.table import Table
 from rich.console import Console
 import sys
 import logging
-from .config_utils import add_conn_to_cfg, parse_cfg_for_list, conn_name_exists, remove_conn_from_cfg, remove_all_conn_from_cfg, add_key_to_keys_dir
-from .remote_utils import copy_pubkey_to_remote, remove_pubkey_from_remote
+from .config_utils import get_sshu_config, add_conn_to_cfg, parse_cfg_for_list, conn_name_exists, remove_conn_from_cfg, remove_all_conn_from_cfg, add_key_to_keys_dir
+from .remote_utils import get_server_pubkey, copy_pubkey_to_remote, remove_pubkey_from_remote
 
 home_dir = Path.home()
 ssh_dir = home_dir / ".ssh"
@@ -17,6 +17,12 @@ logger = logging.getLogger(__name__)
 
 def add(conn_name: str, user: str, address: str, passwd: bool, copyid: bool, keypair: str, port: str):
     logger.debug(f"Target connection name -> {conn_name}")
+
+    sshu_cfg = get_sshu_config()
+
+    if sshu_cfg["keys_scan"]:
+        logger.debug("Getting server public key into known_hosts file")
+        get_server_pubkey(hostname=address,user=user,port=port,retries=3)
 
     if conn_name_exists(conn_name, ssh_cfg):
         logger.warning(f"Addition aborted: Connection '{conn_name}' already exists.")

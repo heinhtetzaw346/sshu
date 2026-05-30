@@ -2,8 +2,10 @@ import typer
 import getpass
 from pathlib import Path
 from fabric import Connection
+import paramiko
 import sys
 import logging
+import shutil
 from .config_utils import get_sshu_config
 
 logger = logging.getLogger(__name__)
@@ -13,15 +15,58 @@ ssh_dir = home_dir / ".ssh"
 ssh_cfg = ssh_dir / "config"
 sshu_marker = "#### Managed by SSHU ####"
 
+def get_server_pubkey(hostname:str, user:str, port:str, retries: int):
+    conn = paramiko.SSHClient()
+    conn.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+    known_host_string: str = ""
+    try:
+        logger.info("Connecting to the remote server for pubkey retrieval")
+        conn.connect(hostname=hostname, username=user, port=int(port), password="")
+    except (paramiko.AuthenticationException, paramiko.SSHException) as auth_err:
+        logger.info(f"Auth / Connection restriction bypassed: {type(auth_err).__name__}")
+    except Exception as e:
+        logger.error(f"Error getting server public key -> {e}")
+        typer.secho(f"Error: {type(e).__name__} – {e}", fg=typer.colors.BRIGHT_RED)
+        if retries > 0:
+            logger.warning(f"Retrying connection to '{hostname}'... {retries} retries left.")
+            typer.echo(f"Retrying host [{hostname}] {retries} retries left...")
+            get_server_pubkey(hostname,user,port,retries - 1)
+        else:
+            logger.error(f"Failed to copy pubkey to '{hostname}' after multiple retries.")
+            typer.echo(f"host [{hostname}] failed after multiple retries")
+            sys.exit()
+
+    trans = conn.get_transport()
+    if trans is not None:
+        srv_key = trans.get_remote_server_key()  
+        srv_key_type = srv_key.get_name()
+        srv_key_b64 = srv_key.get_base64()
+        known_host_string = f"{hostname} {srv_key_type} {srv_key_b64}\n"
+        logger.debug(f"known_host_string -> {known_host_string}")
+
+    with open(f"{ssh_dir}/known_hosts", mode="r") as f:
+        tmp_known_hosts_content = f.readlines()
+
+    if known_host_string in tmp_known_hosts_content:
+        logger.info("Server public key is already in the known_hosts file")
+    else:
+        logger.debug("Writing known_host_string to temp file")
+        tmp_known_hosts_content.append(known_host_string)
+        with open(f"{ssh_dir}/known_hosts_tmp", mode="w") as f:
+            f.writelines(tmp_known_hosts_content)
+        shutil.copyfile(f"{ssh_dir}/known_hosts_tmp",f"{ssh_dir}/known_hosts")
+        logger.debug("Copying temp file into real file")
+        logger.info("Server public key successfully injected into known_hosts file")
+
+
 def copy_pubkey_to_remote(hostname:str, user:str, port:str, retries: int):
     logger.debug(f"Target for pubkey copy -> {user}@{hostname}:{port}")
-
 
     cfg_data = get_sshu_config()
 
     default_identity_file: str = cfg_data["default_identity_key"] + ".pub"
 
-    with open(f"{ssh_dir}/{default_identity_file}") as f:
+    with open(f"{ssh_dir}/{default_identity_file}", mode="r") as f:
         pubkey = f.read()
     
     password = getpass.getpass("Please enter the ssh user password:") 
@@ -118,9 +163,8 @@ def remove_pubkey_from_remote(conn_name:str, ssh_cfg: Path, retries: int):
             key, value = line.split()
             host_info[key] = value
 
-        with open(f"{ssh_dir}/id_ed25519.pub") as f:
+        with open(f"{ssh_dir}/id_ed25519.pub", mode="r") as f:
             pubkey = f.read()
-        
         
         conn = Connection(
             host=host_info["HostName"],

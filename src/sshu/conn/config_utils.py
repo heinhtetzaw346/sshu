@@ -6,6 +6,10 @@ import logging
 import yaml
 import appdirs
 
+sshu_marker = "#### Managed by SSHU ####"
+logger = logging.getLogger(__name__)
+
+
 def get_sshu_config() -> dict:
     sshu_cfg_dir = Path(appdirs.user_config_dir("sshu"))
     sshu_cfg_file = sshu_cfg_dir / "config.yaml"
@@ -16,8 +20,6 @@ def get_sshu_config() -> dict:
     with open(sshu_cfg_file, 'r') as cfg_file:
         return yaml.safe_load(cfg_file) or {}
 
-sshu_marker = "#### Managed by SSHU ####"
-logger = logging.getLogger(__name__)
 
 def parse_cfg_for_list(ssh_cfg: Path, FIELDS: list):
     logger.debug(f"Parsing config file -> {ssh_cfg} for list fields -> {FIELDS}")
