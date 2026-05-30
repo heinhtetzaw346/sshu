@@ -7,7 +7,6 @@ import appdirs
 import yaml
 from pathlib import Path
 from sshu.conn import manager as connmanager
-from sshu.keys import manager as keysmanager
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +28,6 @@ help_message = """  Manage SSH connections and keys\n
                """
 
 app = typer.Typer(help = help_message,add_completion=False)
-app.add_typer(keysmanager.app, name="keys", help="Manage SSH keys")
 
 home_dir = Path.home()
 ssh_dir = home_dir / ".ssh"
