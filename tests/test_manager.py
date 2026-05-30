@@ -4,9 +4,14 @@ from sshu.conn.manager import add
 
 def test_manager_add(temp: tuple, capsys, monkeypatch):
     ssh_cfg: Path = temp[0]
+    temp_dir = temp[1]
+    sshu_cfg_file = temp[2]
     
     from sshu.conn import manager
     monkeypatch.setattr(manager, "ssh_cfg", ssh_cfg)
+    from sshu.conn import config_utils
+    monkeypatch.setattr(config_utils, "sshu_cfg_dir", temp_dir)
+    monkeypatch.setattr(config_utils, "sshu_cfg_file", sshu_cfg_file)
     
     manager.add(
         conn_name="new_test_server",
@@ -26,9 +31,14 @@ def test_manager_add(temp: tuple, capsys, monkeypatch):
 
 def test_manager_add_duplicate(temp: tuple, capsys, monkeypatch):
     ssh_cfg: Path = temp[0]
+    temp_dir = temp[1]
+    sshu_cfg_file = temp[2]
     
     from sshu.conn import manager
     monkeypatch.setattr(manager, "ssh_cfg", ssh_cfg)
+    from sshu.conn import config_utils
+    monkeypatch.setattr(config_utils, "sshu_cfg_dir", temp_dir)
+    monkeypatch.setattr(config_utils, "sshu_cfg_file", sshu_cfg_file)
     
     with pytest.raises(SystemExit) as exc:
         manager.add(
