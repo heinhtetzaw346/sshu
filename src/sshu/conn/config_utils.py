@@ -8,11 +8,11 @@ import appdirs
 
 sshu_marker = "#### Managed by SSHU ####"
 logger = logging.getLogger(__name__)
+sshu_cfg_dir = Path(appdirs.user_config_dir("sshu"))
+sshu_cfg_file = sshu_cfg_dir / "config.yaml"
 
 
 def get_sshu_config() -> dict:
-    sshu_cfg_dir = Path(appdirs.user_config_dir("sshu"))
-    sshu_cfg_file = sshu_cfg_dir / "config.yaml"
 
     if not sshu_cfg_file.exists():
         return {}

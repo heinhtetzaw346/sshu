@@ -168,18 +168,25 @@ def initialize_sshu_config(ssh_dir: Path, sshu_cfg_dir: Path, sshu_cfg_file: Pat
     with open(sshu_cfg_file,'r') as cfg_file:
         cfg_data: dict = yaml.safe_load(cfg_file) or {}
 
+    logger.debug(f"cfg_data -> {cfg_data}")
+
     new_cfg_data: dict = cfg_data
 
     if len(cfg_data) == 0:
         new_cfg_data = default_config
         logger.info("No config data exists yet, populating with default values")
     else:
-        for key in default_config.keys():
-            if not key in cfg_data.keys() or not cfg_data[key]:
-                new_cfg_data[key]=default_config[key]
-                logger.info(f"No key {key} set, setting it the default value.")
+        for key,default_value in default_config.items():
+            if key not in cfg_data.keys():
+                new_cfg_data[key]=default_value
+                logger.info(f"No key {key} set, setting it to the default value.")
+                logger.debug(f"Key -> {key}. Value -> {cfg_data[key]}")
+            elif cfg_data[key] in (None, ""):
+                new_cfg_data[key]=default_value
+                logger.info(f"{key} value is empty, setting it to the default value.")
                 logger.debug(f"Key -> {key}. Value -> {cfg_data[key]}")
             else:
+                logger.debug(f"Key {key} already exists and has a value")
                 continue
     
     with open(sshu_cfg_file,'w') as cfg_file:
