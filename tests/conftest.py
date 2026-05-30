@@ -1,12 +1,13 @@
 import pytest
 import shutil
 from pathlib import Path
+import yaml
 
 @pytest.fixture
 def temp():
     temp_dir = Path.cwd() / ".temp"
     temp_cfg = temp_dir / "tmp_config"
-    temp_sshu_cfg = temp_dir / "temp_sshu_cfg.yaml"
+    temp_sshu_cfg = temp_dir / "temp_sshu_config.yaml"
     
     if not temp_dir.exists():
         temp_dir.mkdir(mode=0o700)
@@ -30,11 +31,14 @@ Port 22
 #Keyed no
         """)
 
-    temp_sshu_cfg.write_text(f"""
-default_identity_key: id_ed25519
-keys_dir: {str(temp_dir)}/keys 
-keys_scan: true
-""")
+    temp_sshu_cfg_content: dict = {
+        "default_identity_key": "id_ed25519",
+        "keys_dir": f"{str(temp_dir)}/keys",
+        "keys_scan": False
+    }
+
+    with open(temp_sshu_cfg,mode="w") as f:
+        yaml.safe_dump(temp_sshu_cfg_content,f)
 
     yield temp_cfg, temp_dir, temp_sshu_cfg
 

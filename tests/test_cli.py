@@ -19,6 +19,9 @@ def test_cli_add_command(temp: tuple, monkeypatch):
     
     from sshu.conn import manager
     monkeypatch.setattr(manager, "ssh_cfg", ssh_cfg)
+    from sshu.conn import config_utils
+    monkeypatch.setattr(config_utils, "sshu_cfg_dir", temp_dir)
+    monkeypatch.setattr(config_utils, "sshu_cfg_file", sshu_cfg_file)
     
     result = runner.invoke(app, ["add", "cli_test_server", "-u", "cliapp", "-a", "192.168.99.99", "--passwd"])
     

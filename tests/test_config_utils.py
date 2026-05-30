@@ -123,28 +123,34 @@ def test_remove_conn_above_marker_aborts(temp: tuple):
 
 def test_get_sshu_config_exists(monkeypatch, tmp_path):
     # Mock the config dir
-    monkeypatch.setattr("sshu.conn.config_utils.appdirs.user_config_dir", lambda x: str(tmp_path))
+    from sshu.conn import config_utils
+    monkeypatch.setattr(config_utils, "sshu_cfg_dir", tmp_path)
     
     # Create the mock config file
     config_file = tmp_path / "config.yaml"
     config_file.write_text("keys_scan: true\ndefault_identity_key: id_rsa")
+    monkeypatch.setattr(config_utils, "sshu_cfg_file", config_file)
     
     config = get_sshu_config()
     assert config == {"keys_scan": True, "default_identity_key": "id_rsa"}
 
 def test_get_sshu_config_not_exists(monkeypatch, tmp_path):
     # Mock the config dir where the file doesn't exist
-    monkeypatch.setattr("sshu.conn.config_utils.appdirs.user_config_dir", lambda x: str(tmp_path))
+    from sshu.conn import config_utils
+    monkeypatch.setattr(config_utils, "sshu_cfg_dir", tmp_path)
+    monkeypatch.setattr(config_utils, "sshu_cfg_file", tmp_path / "config.yaml")
     
     config = get_sshu_config()
     assert config == {}
 
 def test_get_sshu_config_empty(monkeypatch, tmp_path):
     # Mock the config dir and create an empty file
-    monkeypatch.setattr("sshu.conn.config_utils.appdirs.user_config_dir", lambda x: str(tmp_path))
+    from sshu.conn import config_utils
+    monkeypatch.setattr(config_utils, "sshu_cfg_dir", tmp_path)
     
     config_file = tmp_path / "config.yaml"
     config_file.touch()
+    monkeypatch.setattr(config_utils, "sshu_cfg_file", config_file)
     
     config = get_sshu_config()
     assert config == {}
