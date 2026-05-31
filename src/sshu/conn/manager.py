@@ -21,14 +21,14 @@ def add(conn_name: str, user: str, address: str, passwd: bool, copyid: bool, key
 
     sshu_cfg = get_sshu_config()
 
-    if sshu_cfg["keys_scan"]:
-        logger.debug("Getting server public key into known_hosts file")
-        get_server_pubkey(hostname=address,user=user,port=port,retries=3)
-
     if conn_name_exists(conn_name, ssh_cfg):
         logger.warning(f"Addition aborted: Connection '{conn_name}' already exists.")
         typer.secho(f"Connection {conn_name} already exists", fg=typer.colors.BRIGHT_RED)
         sys.exit()
+
+    if sshu_cfg["keys_scan"]:
+        logger.debug("Getting server public key into known_hosts file")
+        get_server_pubkey(hostname=address,user=user,port=port,retries=3)
 
     logger.debug(f"Parsed hostname -> {address}, user -> {user}")
     host_cfg = f"Host {conn_name}\n  HostName {address}\n  User {user}\n  Port {port}\n"
