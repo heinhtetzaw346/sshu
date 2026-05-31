@@ -75,6 +75,21 @@ All working commands:
 - sshu rm --remote connection_name
 - sshu rm --all
 
+## Configuration File
+
+The sshu configuration file exists at this path `$HOME/.config/sshu/config.yaml`
+</br>
+Example configs are as below:
+```yaml
+default_identity_key: id_ed25519
+keys_dir: /home/fureasu/.ssh/keys
+keys_scan: true
+```
+|Key|Description|Default|
+|---|---|---|
+|default_identity_key|The private key used for --copyid|id_ed25519|
+|keys_dir|Where the store the imported private keys|<your_home_dir>/.ssh/keys|
+|keys_scan|Whether to populare the known_hosts file when adding connections|true|
 
 ## What is used
 
