@@ -68,13 +68,7 @@ def add_conn_to_cfg(host_cfg: str, ssh_cfg: Path):
 
 def conn_name_exists(conn_name: str, ssh_cfg: Path):
     logger.debug(f"Checking if connection '{conn_name}' exists.")
-    ssh_cfg_content = ssh_cfg.read_text().splitlines()
-    conn_name_list = []
-
-    for line in ssh_cfg_content:
-        if line.startswith('Host '):
-            host = line.split(' ')[1]
-            conn_name_list.append(host)
+    conn_name_list = get_managed_connections(ssh_cfg)
 
     if conn_name in conn_name_list:
         return True
