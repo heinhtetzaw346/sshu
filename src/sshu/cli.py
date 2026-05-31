@@ -7,6 +7,7 @@ import appdirs
 import yaml
 from pathlib import Path
 from sshu.conn import manager as connmanager
+from sshu.conn.config_utils import get_managed_connections
 
 logger = logging.getLogger(__name__)
 
@@ -27,10 +28,11 @@ help_message = """  Manage SSH connections and keys\n
                     sshu add web_server -u sysadmin -a 192.168.1.50 --port 8282 --keypair ~/.ssh/Web_Server_Key.pem
                """
 
-app = typer.Typer(help = help_message,add_completion=False)
+app = typer.Typer(help = help_message,add_completion=True)
 
 home_dir = Path.home()
 ssh_dir = home_dir / ".ssh"
+ssh_cfg = ssh_dir/"config"
 sshu_marker = "#### Managed by SSHU ####"
 sshu_cfg_dir = Path(appdirs.user_config_dir("sshu"))
 sshu_cfg_file = sshu_cfg_dir / "config.yaml"
@@ -222,9 +224,13 @@ def add(
 
     connmanager.add(conn_name, user, address, passwd, copyid, keypair, port)
 
+def connection_names(incomplete: str):
+    managed_connections: list[str] = get_managed_connections(ssh_cfg)
+    return [conn for conn in managed_connections if conn.startswith(incomplete)]
+
 @app.command()
 def rm(
-    conn_name: str = typer.Argument(None,help="SSH connection name to remove"),
+    conn_name: str = typer.Argument(None,help="SSH connection name to remove",autocompletion=connection_names),
     all: bool = typer.Option(False,"--all", "-A", help="Remove all ssh connections. This will restore the ssh config file to the state before sshu was used"),
     remote: bool = typer.Option(False, "--remote", "-r", help="Remove the public key from the remote server. This can only be done for connections with Keyed=yes")
 ):
