@@ -1,4 +1,4 @@
-from sshu.conn.config_utils import add_conn_to_cfg, conn_name_exists, parse_cfg_for_list, add_key_to_keys_dir, remove_all_conn_from_cfg, remove_conn_from_cfg, get_sshu_config
+from sshu.conn.config_utils import add_conn_to_cfg, conn_name_exists, parse_cfg_for_list, add_key_to_keys_dir, remove_all_conn_from_cfg, remove_conn_from_cfg, get_sshu_config, get_managed_connections
 from pathlib import Path
 import pytest
 
@@ -154,3 +154,9 @@ def test_get_sshu_config_empty(monkeypatch, tmp_path):
     
     config = get_sshu_config()
     assert config == {}
+
+def test_get_managed_connections(temp):
+    ssh_cfg: Path = temp[0]
+    connections = get_managed_connections(ssh_cfg)
+    assert connections[0] == "unittest"
+    assert connections[1] == "pytest"

@@ -145,3 +145,22 @@ def add_key_to_keys_dir(keypair_to_add: Path, keys_dir: Path):
         logger.info(f"Key '{keyfile}' already exists in the keys directory.")
         typer.echo(f"{keyfile} already exists in the keys directory")
     return new_key_file
+
+def get_managed_connections(ssh_cfg: Path):
+    ssh_cfg_content = ssh_cfg.read_text().splitlines()
+
+    sshu_connections: list[str] = []
+
+    if sshu_marker not in ssh_cfg_content:
+        return sshu_connections
+    else:
+        sshu_marker_index = ssh_cfg_content.index(sshu_marker)
+        sshu_cfg_content = ssh_cfg_content[sshu_marker_index::]
+        for line in sshu_cfg_content:
+            if "Host " in line:
+                hostname = line.split(" ")[1]
+                sshu_connections.append(hostname)
+            else:
+                continue
+
+        return sshu_connections
