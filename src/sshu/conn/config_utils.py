@@ -66,9 +66,9 @@ def add_conn_to_cfg(host_cfg: str, ssh_cfg: Path):
     ssh_cfg.write_text("\n".join(ssh_cfg_content)+"\n")
 
 
-def conn_name_exists(conn_name: str, ssh_cfg: Path):
+def conn_name_exists(conn_name: str, ssh_cfg: Path, all: bool = False):
     logger.debug(f"Checking if connection '{conn_name}' exists.")
-    conn_name_list = get_managed_connections(ssh_cfg)
+    conn_name_list = get_managed_connections(ssh_cfg, all=all)
 
     if conn_name in conn_name_list:
         return True
@@ -140,21 +140,24 @@ def add_key_to_keys_dir(keypair_to_add: Path, keys_dir: Path):
         typer.echo(f"{keyfile} already exists in the keys directory")
     return new_key_file
 
-def get_managed_connections(ssh_cfg: Path):
+def get_managed_connections(ssh_cfg: Path, all: bool = False):
     ssh_cfg_content = ssh_cfg.read_text().splitlines()
 
     sshu_connections: list[str] = []
+    content_to_parse = ssh_cfg_content
 
-    if sshu_marker not in ssh_cfg_content:
-        return sshu_connections
-    else:
-        sshu_marker_index = ssh_cfg_content.index(sshu_marker)
-        sshu_cfg_content = ssh_cfg_content[sshu_marker_index::]
-        for line in sshu_cfg_content:
-            if "Host " in line:
-                hostname = line.split(" ")[1]
-                sshu_connections.append(hostname)
-            else:
-                continue
+    if not all:
+        if sshu_marker not in ssh_cfg_content:
+            return sshu_connections
+        else:
+            sshu_marker_index = ssh_cfg_content.index(sshu_marker)
+            content_to_parse = ssh_cfg_content[sshu_marker_index::]
 
-        return sshu_connections
+    for line in content_to_parse:
+        if line.startswith("Host "):
+            hostname = line.split(" ")[1]
+            sshu_connections.append(hostname)
+        else:
+            continue
+
+    return sshu_connections

@@ -21,7 +21,7 @@ def add(conn_name: str, user: str, address: str, passwd: bool, copyid: bool, key
 
     sshu_cfg = get_sshu_config()
 
-    if conn_name_exists(conn_name, ssh_cfg):
+    if conn_name_exists(conn_name, ssh_cfg, all=True):
         logger.warning(f"Addition aborted: Connection '{conn_name}' already exists.")
         typer.secho(f"Connection {conn_name} already exists", fg=typer.colors.BRIGHT_RED)
         sys.exit()
@@ -102,7 +102,7 @@ def remove(conn_name: str, all: bool, remote: bool):
             logger.info("Removed all managed connections from config.")
 
     elif conn_name:
-        if not conn_name_exists(conn_name, ssh_cfg):
+        if not conn_name_exists(conn_name, ssh_cfg, all=False):
             logger.warning(f"Deletion aborted: No ssh connection named '{conn_name}' exists.")
             typer.secho(f"No ssh connection named {conn_name} exists...", fg=typer.colors.BRIGHT_RED)
             sys.exit()

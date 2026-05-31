@@ -225,7 +225,7 @@ def add(
     connmanager.add(conn_name, user, address, passwd, copyid, keypair, port)
 
 def connection_names(incomplete: str):
-    managed_connections: list[str] = get_managed_connections(ssh_cfg)
+    managed_connections: list[str] = get_managed_connections(ssh_cfg, all=False)
     return [conn for conn in managed_connections if conn.startswith(incomplete)]
 
 @app.command()
