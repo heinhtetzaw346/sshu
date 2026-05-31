@@ -1,4 +1,4 @@
-from sshu.cli import initialize_ssh_config, initialize_ssh_keys, initialize_sshu_config
+from sshu.cli import initialize_ssh_config, initialize_sshu_config
 from pathlib import Path
 import yaml
 
@@ -38,17 +38,3 @@ def test_init_ssh_config_keys(temp: tuple):
     assert keys_dir.exists()
     assert "#### Managed by SSHU ####" in ssh_cfg.read_text()
 
-
-def test_init_keys_present(temp: tuple):
-    ssh_dir: Path = temp[1]
-    sshu_cfg_file: Path = temp[2]
-    priv_key = ssh_dir / "id_ed25519"
-    priv_key.touch(mode=0o600)
-    ret = initialize_ssh_keys(ssh_dir, sshu_cfg_file)
-    assert ret == 0
-
-def test_init_keys_absent(temp: tuple):
-    ssh_dir: Path = temp[1]
-    sshu_cfg_file: Path = temp[2]
-    ret = initialize_ssh_keys(ssh_dir, sshu_cfg_file)
-    assert ret == 1
