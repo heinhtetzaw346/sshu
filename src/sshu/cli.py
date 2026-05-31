@@ -65,7 +65,6 @@ def main(
     ret = 0
     ret |= initialize_sshu_config(ssh_dir,sshu_cfg_dir, sshu_cfg_file)
     ret |= initialize_ssh_config(ssh_dir, sshu_cfg_file)
-    ret |= initialize_ssh_keys(ssh_dir, sshu_cfg_file)
 
     if ret != 0:
         sys.exit(1)
@@ -125,24 +124,6 @@ def initialize_ssh_config(ssh_dir: Path, sshu_cfg_file: Path):
 
     return 0
 
-def initialize_ssh_keys(ssh_dir: Path, sshu_cfg_file: Path):
-
-    with open(sshu_cfg_file,'r') as cfg_file:
-        cfg_data: dict = yaml.safe_load(cfg_file) or {}
-
-    default_identity_key: str = cfg_data["default_identity_key"]
-
-    ssh_dir_contents = os.listdir(ssh_dir)
-    logger.debug(f"ssh dir contents -> {ssh_dir_contents}")
-    if not default_identity_key in ssh_dir_contents:
-        typer.secho(f"No {default_identity_key} file found in {ssh_dir} directory. Please check the default_identity_key value in {str(sshu_cfg_file)}", fg=typer.colors.BRIGHT_RED)
-        typer.secho("Or create the key by running ssh-keygen", fg=typer.colors.BRIGHT_RED)
-        logger.info("The default identity key is not found in .ssh dir")
-        return 1
-    else:
-        logger.info("The default identity key already exists.")
-        return 0
-   
 def initialize_sshu_config(ssh_dir: Path, sshu_cfg_dir: Path, sshu_cfg_file: Path):
 
     if not os.path.exists(sshu_cfg_dir):

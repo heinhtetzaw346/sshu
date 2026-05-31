@@ -6,6 +6,7 @@ import sys
 import logging
 from .config_utils import get_sshu_config, add_conn_to_cfg, parse_cfg_for_list, conn_name_exists, remove_conn_from_cfg, remove_all_conn_from_cfg, add_key_to_keys_dir
 from .remote_utils import get_server_pubkey, copy_pubkey_to_remote, remove_pubkey_from_remote
+import os
 
 home_dir = Path.home()
 ssh_dir = home_dir / ".ssh"
@@ -31,12 +32,21 @@ def add(conn_name: str, user: str, address: str, passwd: bool, copyid: bool, key
 
     logger.debug(f"Parsed hostname -> {address}, user -> {user}")
     host_cfg = f"Host {conn_name}\n  HostName {address}\n  User {user}\n  Port {port}\n"
-    
+   
     if passwd:
         if copyid:
-            typer.echo(f"Copying public key to [{address}] for {conn_name}")
-            copy_pubkey_to_remote(address,user,port,retries=3)
-            host_cfg = host_cfg + "  #Keyed yes\n"
+            ssh_dir_contents = os.listdir(ssh_dir)
+            default_identity_key = sshu_cfg["default_identity_key"]
+            if not default_identity_key in ssh_dir_contents:
+                typer.secho(f"No {default_identity_key} file found in {ssh_dir} directory. Please check the default_identity_key value in sshu config file", fg=typer.colors.BRIGHT_RED)
+                typer.secho("Or create the key by running ssh-keygen", fg=typer.colors.BRIGHT_RED)
+                logger.info("The default identity key is not found in .ssh dir")
+                sys.exit()
+            else:
+                logger.info(f"The default identity exists in {ssh_dir} directory.")
+                typer.echo(f"Copying public key to [{address}] for {conn_name}")
+                copy_pubkey_to_remote(address,user,port,retries=3)
+                host_cfg = host_cfg + "  #Keyed yes\n"
     
     if keypair:
         keypair_to_add = Path(keypair)
