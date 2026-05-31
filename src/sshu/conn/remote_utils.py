@@ -7,6 +7,7 @@ import sys
 import logging
 import shutil
 from .config_utils import get_sshu_config
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -55,8 +56,11 @@ def get_server_pubkey(hostname:str, user:str, port:str, retries: int):
         with open(f"{ssh_dir}/known_hosts_tmp", mode="w") as f:
             f.writelines(tmp_known_hosts_content)
         shutil.copyfile(f"{ssh_dir}/known_hosts_tmp",f"{ssh_dir}/known_hosts")
-        logger.debug("Copying temp file into real file")
+        logger.debug(f"Copying {ssh_dir}/known_hosts_tmp into {ssh_dir}/known_hosts")
         logger.info("Server public key successfully injected into known_hosts file")
+
+        os.remove(f"{ssh_dir}/known_hosts_tmp")
+        logger.debug(f"Cleaned up {ssh_dir}/known_hosts_tmp")
 
 
 def copy_pubkey_to_remote(hostname:str, user:str, port:str, retries: int):
