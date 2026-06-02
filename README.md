@@ -1,152 +1,195 @@
-# SSH Utility
+# SSHU (SSH Utility)
 
-python cli app made with typer that manages ssh connections interactively with commands. Saves time from manually editing the ssh config file and easily connect to remote host with simple names.
+![Python Version](https://img.shields.io/badge/python-3.12-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey)
 
-## Commands
+**SSHU** is an interactive, command-line application designed to simplify SSH connection management. Built with Python and Typer, it eliminates the need to manually edit your `~/.ssh/config` file, allowing you to easily add, remove, list, and connect to remote hosts using simple, memorable names.
 
-- ls -> list connections
-- add -> add connections
-- rm -> remove connections
+---
 
-## Supported OS
+## Table of Contents
 
-Only linux with glibc libraries is tested by me. All the following OS will have binaries built for them.</br> 
-sshu is not OS specific if installed with pip.
-- Linux (glibc) Debian, RedHat
-- Linux (musl) Alpine
-- MacOS
-- Windows
+- [Features](#features)
+- [Supported Platforms](#supported-platforms)
+- [Installation](#installation)
+  - [Using the Installer Script (Beta)](#using-the-installer-script-beta)
+  - [Manual Installation](#manual-installation)
+- [Usage / Command Reference](#usage--command-reference)
+- [Configuration](#configuration)
+- [Logging & Troubleshooting](#logging--troubleshooting)
+- [Building from Source](#building-from-source)
+- [Technologies Used](#technologies-used)
 
-## Releases
+---
 
-You can find all official releases on the [Releases page](../../releases).
+## Features
 
-### Test Pypi
-For dev pip packages, you can visit [https://test.pypi.org/project/sshu/](https://test.pypi.org/project/sshu/) and download from there.
+- **Interactive Management**: Add, remove, and list SSH connections from the command line.
+- **Key Management**: Automatically copy identities or use specific key pairs.
+- **Portability**: Available as a standalone binary or via pip.
+- **Host Key Scanning**: Automatically populates `known_hosts` when adding new connections, either via CLI flags or configuration.
+- **Autocompletion**: Built-in autocompletion for commands and connection names.
 
-## How to use
+## Supported Platforms
 
-### Use the installation script.
+SSHU is OS-agnostic when installed via pip. Standalone binaries are available for the following operating systems:
 
-> [!NOTE] 
-> This hasn't been developed and tested fully yet.
-</br>
+- **Linux (glibc)**: Debian, Ubuntu, RedHat, Fedora, etc.
+- **Linux (musl)**: Alpine
+- **macOS**
+- **Windows**
 
-Run the following command
-```
+*(Note: Currently, only Linux with glibc is fully tested natively, but binaries are built for all listed platforms.)*
+
+---
+
+## Installation
+
+You can find all official releases on the [Releases page](../../releases). For developmental pip packages, visit [Test PyPI](https://test.pypi.org/project/sshu/).
+
+### Using the Installer Script (Beta)
+
+> [!NOTE]
+> The installation script is currently in beta and is tailored for Debian, RedHat, and SUSE-based distributions using bash-like shells.
+
+```bash
 curl -fsSL https://raw.githubusercontent.com/FuReAsu/sshu/refs/heads/main/install/linux_bash/sshu-installer.sh | sudo bash
 ```
-Currently, this script is only usable for Debian-like distros, RedHat-like distros and SUSE distros and using bash-like shell.
 
+### Manual Installation
 
-### Install it yourself
+1. Download the appropriate `.tar.gz` or `.zip` file from the [Releases page](../../releases) or GitHub Actions artifacts.
+2. Extract the archive:
+   ```bash
+   tar -xzvf sshu-beta-v0.1.1.tar.gz
+   ```
+3. Move the extracted binary to a directory included in your system's `PATH`:
+   ```bash
+   sudo mv sshu /usr/local/bin/
+   ```
+4. Verify the installation:
+   ```bash
+   sshu --help
+   ```
 
-Download the tar file from the releases. Or the binaries in github-actions workflows.
+---
 
-Extract it if tar or zip
+## Usage / Command Reference
 
+Manage your connections directly from the CLI. 
+
+### Listing Connections
+```bash
+sshu ls
 ```
-tar -xzvf sshu-beta-v0.1.1.tar.gz
+
+### Adding a Connection
+```bash
+# Basic setup with a password prompt
+sshu add connection_name -u user -a hostname --passwd
+
+# Add and immediately copy SSH ID to the remote host
+sshu add connection_name -u user -a hostname --passwd --copyid
+
+# Add using an existing, specific keypair
+sshu add connection_name -u user -a hostname --keypair /path/to/key
+
+# Add connection with a custom SSH port (e.g., 8282)
+sshu add connection_name -u user -a hostname -k /path/to/key --port 8282
+
+# Add connection and scan server host key to known_hosts
+sshu add connection_name -u user -a hostname -P --key-scan
 ```
 
-Move the binary to a local binary directory.
+### Removing a Connection
+```bash
+# Remove a connection locally (supports autocompletion)
+sshu rm connection_name
 
+# Remove a connection locally and clean up remote keys
+sshu rm --remote connection_name
+
+# Remove all managed connections and restore SSH config
+sshu rm --all
 ```
-sudo mv sshu /usr/local/bin/
-```
-You can now start running sshu commands.
 
-## Command Reference
+---
 
-Currently only the main sshu cli app is working, keys haven't been worked on.
+## Configuration
 
-All working commands:
+SSHU utilizes a YAML configuration file located at: `$HOME/.config/sshu/config.yaml`
 
-- sshu ls
-- sshu add connection_name -u user -a hostname --passwd
-- sshu add connection_name -u user -a hostname --passwd --copyid
-- sshu add connection_name -u user -a hostname --keypair /path/to/key
-- sshu rm connection_name
-- sshu rm --remote connection_name
-- sshu rm --all
+### Example Configuration
 
-## Configuration File
-
-The sshu configuration file exists at this path `$HOME/.config/sshu/config.yaml`
-</br>
-Example configs are as below:
 ```yaml
 default_identity_key: id_ed25519
 keys_dir: /home/fureasu/.ssh/keys
-keys_scan: true
+key_scan: false
 ```
-|Key|Description|Default|
+
+### Configuration Reference
+
+| Key | Description | Default Value |
 |---|---|---|
-|default_identity_key|The private key used for --copyid|id_ed25519|
-|keys_dir|Where the store the imported private keys|<your_home_dir>/.ssh/keys|
-|keys_scan|Whether to populare the known_hosts file when adding connections|true|
+| `default_identity_key` | The private key used when the `--copyid` flag is passed. | `id_ed25519` |
+| `keys_dir` | Directory where imported private keys are stored. | `~/.ssh/keys` |
+| `key_scan` | Whether to populate the `known_hosts` file automatically when adding connections. | `false` |
 
-## What is used
+---
 
-Below are what I used in sshu:
+## Logging & Troubleshooting
 
-- Python 3.12
-- Typer for cli app
-- Fabric for remote command execution over ssh connection
+SSHU logs background activity and debugging information to help you trace actions and troubleshoot errors. 
 
-## Logging
+- **Linux**: `~/.local/share/sshu/sshu.log`
+- **macOS/Windows**: Located in the respective user data directory for the application.
 
-SSHU logs background activity and debugging information to help you trace actions and troubleshoot errors. The log file is located at the app user data directory, typically `~/.local/share/sshu/sshu.log` on Linux.
+---
 
-## Build it yourself
+## Building from Source
 
-Building it yourself is quick and easy, only taking upwards of 3 minutes. The best part is it is guaranteed to work.
+Building SSHU yourself is fast (usually under 3 minutes) and ensures compatibility with your specific environment.
 
-Clone the repo 
-``````
-git clone https://github.com/FuReAsu/sshu.git && cd sshu
-``````
-<br/>
-
-**Natively on your system**
-
-Install dependencies
-
-```
-pip install -r requirement.txt
-```
-
-Run pyinstaller
-
-```
-pyinstaller --name sshu --distpath ./bin -p ./sshu --onefile ./sshu/cli.py
-```
-
-The resulting binary will be in the ./dist directory.
-<br/>
-<br/>
-
-**With Docker**
-
-There are different dockerfiles for different build configurations in the [build](build) directory.
-
-Use glibc dockerfile for mainstream distros using glibc like most Debian-like and RedHat-like. Use musl dockerfile for distros that use musl like Alpine.
-
-You can edit the Dockerfile to fit your needs if you want but. It's ready to run.
-
-```
-docker build -t local/sshu-build:latest -f build/Dockerfile.linux_glibc .
-```
-
-Run container to build image. Specifiy the correct ./dist sub dir.
-
-```
-docker run --rm -it -v ./bin/linux_glibc:/dist local/sshu-build:latest
-```
-
-The resulting binary will be in the ./bin directory.
-
-You can then move this binary into the binary path. Like
+First, clone the repository:
 ```bash
-cp bin/linux_glibc/sshu /usr/local/bin
+git clone https://github.com/FuReAsu/sshu.git
+cd sshu
 ```
+
+### Method 1: Natively
+
+1. Install Python dependencies:
+   ```bash
+   pip install -r requirement.txt
+   ```
+2. Build the executable using PyInstaller:
+   ```bash
+   pyinstaller --name sshu --distpath ./bin -p ./sshu --onefile ./sshu/cli.py
+   ```
+3. The resulting binary will be placed in the `./dist` (or `./bin` depending on your PyInstaller version) directory.
+
+### Method 2: With Docker
+
+Different Dockerfiles are available in the `build/` directory for various target environments (e.g., `glibc` for mainstream Linux, `musl` for Alpine).
+
+1. Build the Docker image:
+   ```bash
+   docker build -t local/sshu-build:latest -f build/Dockerfile.linux_glibc .
+   ```
+2. Run the container to compile the binary and extract it to your local `./bin` directory:
+   ```bash
+   docker run --rm -it -v $(pwd)/bin/linux_glibc:/dist local/sshu-build:latest
+   ```
+3. Move the built binary to your path:
+   ```bash
+   sudo cp bin/linux_glibc/sshu /usr/local/bin
+   ```
+
+---
+
+## Technologies Used
+
+- **[Python 3.12](https://www.python.org/)**: Core programming language.
+- **[Typer](https://typer.tiangolo.com/)**: For building the robust Command Line Interface.
+- **[Fabric](https://www.fabfile.org/)**: For executing remote commands over SSH.
