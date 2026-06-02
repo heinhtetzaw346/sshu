@@ -59,14 +59,14 @@ curl -fsSL https://raw.githubusercontent.com/FuReAsu/sshu/refs/heads/main/instal
 
 ### Manual Installation
 
-1. Download the appropriate `.tar.gz` or `.zip` file from the [Releases page](../../releases)
-2. Extract the archive:
+1. Download the appropriate binary for your platform from the [Releases page](../../releases).
+2. Make the downloaded binary executable (Linux/macOS):
    ```bash
-   tar -xzvf sshu-beta-v0.1.1.tar.gz
+   chmod +x sshu-linux-glibc
    ```
-3. Move the extracted binary to a directory included in your system's `PATH`:
+3. Move the binary to a directory included in your system's `PATH`:
    ```bash
-   sudo mv sshu /usr/local/bin/
+   sudo mv sshu-linux-glibc /usr/local/bin/sshu
    ```
 4. Verify the installation:
    ```bash
