@@ -49,9 +49,14 @@ def show_version():
 
 @app.callback(invoke_without_command=True)
 def main(
+    ctx: typer.Context,
     verbose: int = typer.Option(0, "--verbose", "-v", count=True),
     version: bool = typer.Option(False, "--version", is_eager=True)
     ):
+
+    if ctx.invoked_subcommand is None:
+        typer.echo(ctx.get_help())
+        raise typer.Exit(code=0)
    
     if version:
         show_version()
@@ -62,6 +67,7 @@ def main(
         stdout_level = logging.INFO
     else:
         stdout_level = logging.DEBUG
+
     
     configure_logging(stdout_level)
     ret = 0
