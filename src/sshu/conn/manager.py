@@ -16,7 +16,7 @@ keys_dir = ssh_dir / "keys"
 
 logger = logging.getLogger(__name__)
 
-def add(conn_name: str, user: str, address: str, passwd: bool, copyid: bool, keypair: str, port: str):
+def add(conn_name: str, user: str, address: str, passwd: bool, copyid: bool, keypair: str, port: str, key_scan: bool):
     logger.debug(f"Target connection name -> {conn_name}")
 
     sshu_cfg = get_sshu_config()
@@ -25,8 +25,9 @@ def add(conn_name: str, user: str, address: str, passwd: bool, copyid: bool, key
         logger.warning(f"Addition aborted: Connection '{conn_name}' already exists.")
         typer.secho(f"Connection {conn_name} already exists", fg=typer.colors.BRIGHT_RED)
         sys.exit()
-
-    if sshu_cfg["keys_scan"]:
+    
+    run_key_scan = key_scan if key_scan is not None else sshu_cfg["key_scan"]
+    if run_key_scan:
         logger.debug("Getting server public key into known_hosts file")
         get_server_pubkey(hostname=address,user=user,port=port,retries=3)
 
