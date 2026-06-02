@@ -7,7 +7,6 @@ python cli app made with typer that manages ssh connections interactively with c
 - ls -> list connections
 - add -> add connections
 - rm -> remove connections
-- keys -> manage keys
 
 ## Supported OS
 
@@ -21,10 +20,6 @@ sshu is not OS specific if installed with pip.
 ## Releases
 
 You can find all official releases on the [Releases page](../../releases).
-
-### Dev Binaries
-For latest dev binaries, you can head over to [https://github.com/FuReAsu/sshu/actions/workflows/ci-cd.yaml](https://github.com/FuReAsu/sshu/actions/workflows/ci-cd.yaml) </br>
-You can click on a pipeline, download the binaries and use them as you like.
 
 ### Test Pypi
 For dev pip packages, you can visit [https://test.pypi.org/project/sshu/](https://test.pypi.org/project/sshu/) and download from there.
@@ -153,5 +148,5 @@ The resulting binary will be in the ./bin directory.
 
 You can then move this binary into the binary path. Like
 ```bash
-cp bin/sshu /usr/local/bin
+cp bin/linux_glibc/sshu /usr/local/bin
 ```
