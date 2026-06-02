@@ -187,12 +187,14 @@ jobs:
       - name: Set token
         run: echo -e "[testpypi]\nusername = __token__\npassword = ${{ secrets.TEST_PYPI_TOKEN }}" > $HOME/.pypirc
       - name: Upload to test-pypi
-        run: twine upload --repository testpypi dist/* || true
+        run: twine upload --skip-existing --repository testpypi dist/*
 
   release_prod:
     needs: [prepare, build_pip]
     if: needs.prepare.outputs.is_prod_tag == 'true'
     runs-on: ubuntu-24.04
+    permissions:
+      contents: write
     steps:
       - name: Checkout repo
         uses: actions/checkout@v6
@@ -211,7 +213,7 @@ jobs:
       - name: Set token
         run: echo -e "[pypi]\nusername = __token__\npassword = ${{ secrets.PYPI_TOKEN }}" > $HOME/.pypirc
       - name: Upload to PyPI
-        run: twine upload --repository pypi all-artifacts/pip-${{ needs.prepare.outputs.version }}/* || true
+        run: twine upload --skip-existing --repository pypi all-artifacts/pip-${{ needs.prepare.outputs.version }}/*
       - name: Rename binaries for release
         run: |
           mkdir -p release-binaries
@@ -222,6 +224,7 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
+          token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             release-binaries/*
           body: |
