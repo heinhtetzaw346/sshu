@@ -116,7 +116,7 @@ def remove_all_conn_from_cfg(ssh_cfg: Path):
     if sshu_marker not in ssh_cfg_content:
         logger.warning("No sshu configurations found to delete.")
         typer.secho("No sshu configurations found to delete", fg=typer.colors.BRIGHT_RED)
-        sys.exit()
+        sys.exit(0)
 
     sshu_marker_index = ssh_cfg_content.index(sshu_marker)
     sshu_cfg_content = ssh_cfg_content[sshu_marker_index::]

@@ -213,7 +213,7 @@ def add(
     """
 
     if not conn_name or conn_name == None:
-        typer.secho("Invalid Arugment! You have to provide [ connection name ]", fg=typer.colors.BRIGHT_RED, err=True)
+        typer.secho("Invalid Argument! You have to provide [ connection name ]", fg=typer.colors.BRIGHT_RED, err=True)
         raise typer.Exit(code=1)
 
     if passwd and keypair:
@@ -221,7 +221,7 @@ def add(
         raise typer.Exit(code=1)
 
     if not passwd and not keypair:
-        typer.secho("Please choose at least one authenticaiton option --passwd or --keypair", fg=typer.colors.BRIGHT_RED, err=True)
+        typer.secho("Please choose at least one authentication option --passwd or --keypair", fg=typer.colors.BRIGHT_RED, err=True)
         raise typer.Exit(code=1)
 
     if keypair and copyid:
@@ -245,7 +245,7 @@ def rm(
     """
 
     if not all and (not conn_name or conn_name == None):
-        typer.secho("Invalid Arugment! You have to provide [ connection name ]", fg=typer.colors.BRIGHT_RED, err=True)
+        typer.secho("Invalid Argument! You have to provide [ connection name ]", fg=typer.colors.BRIGHT_RED, err=True)
         raise typer.Exit(code=1)
 
     if all and remote:

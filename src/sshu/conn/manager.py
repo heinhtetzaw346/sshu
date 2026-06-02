@@ -24,7 +24,7 @@ def add(conn_name: str, user: str, address: str, passwd: bool, copyid: bool, key
     if conn_name_exists(conn_name, ssh_cfg, all=True):
         logger.warning(f"Addition aborted: Connection '{conn_name}' already exists.")
         typer.secho(f"Connection {conn_name} already exists", fg=typer.colors.BRIGHT_RED)
-        sys.exit()
+        sys.exit(1)
     
     run_key_scan = key_scan if key_scan is not None else sshu_cfg["key_scan"]
     if run_key_scan:
@@ -42,7 +42,7 @@ def add(conn_name: str, user: str, address: str, passwd: bool, copyid: bool, key
                 typer.secho(f"No {default_identity_key} file found in {ssh_dir} directory. Please check the default_identity_key value in sshu config file", fg=typer.colors.BRIGHT_RED)
                 typer.secho("Or create the key by running ssh-keygen", fg=typer.colors.BRIGHT_RED)
                 logger.info("The default identity key is not found in .ssh dir")
-                sys.exit()
+                sys.exit(1)
             else:
                 logger.info(f"The default identity exists in {ssh_dir} directory.")
                 typer.echo(f"Copying public key to [{address}] for {conn_name}")
@@ -54,7 +54,7 @@ def add(conn_name: str, user: str, address: str, passwd: bool, copyid: bool, key
         if not keypair_to_add.exists():
             logger.error(f"Failed to add connection: No key exists at -> {keypair}")
             typer.secho(f"No key exists at {keypair}", fg=typer.colors.BRIGHT_RED)
-            sys.exit()
+            sys.exit(1)
         else:
             new_key_file = add_key_to_keys_dir(keypair_to_add,keys_dir)
             logger.debug(f"IdentityFile -> {new_key_file}")
@@ -96,7 +96,7 @@ def remove(conn_name: str, all: bool, remote: bool):
         if confirmation == "n":
             logger.info("Removal operation canceled by user.")
             typer.echo("Operation canceled")
-            sys.exit()
+            sys.exit(0)
         elif confirmation == "y":
             typer.echo("Removing sshu configurations")
             remove_all_conn_from_cfg(ssh_cfg)
@@ -106,7 +106,7 @@ def remove(conn_name: str, all: bool, remote: bool):
         if not conn_name_exists(conn_name, ssh_cfg, all=False):
             logger.warning(f"Deletion aborted: No ssh connection named '{conn_name}' exists.")
             typer.secho(f"No ssh connection named {conn_name} exists...", fg=typer.colors.BRIGHT_RED)
-            sys.exit()
+            sys.exit(1)
         if remote:
             logger.debug(f"Removing public key from remote -> {conn_name}")
             remove_pubkey_from_remote(conn_name, ssh_cfg, retries=3)
