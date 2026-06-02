@@ -52,5 +52,5 @@ def test_manager_add_duplicate(temp: tuple, capsys, monkeypatch):
             port="2222",
             key_scan=False
         )
-    assert exc.value.code == None # sys.exit() without arguments defaults to None
+    assert exc.value.code == 1
 

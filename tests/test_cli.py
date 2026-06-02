@@ -63,4 +63,4 @@ def test_cli_add_missing_auth(temp: tuple, monkeypatch):
     # Testing that missing both auth options fails
     result = runner.invoke(app, ["add", "fail_server", "-u", "admin", "-a", "1.1.1.1"])
     assert result.exit_code == 1
-    assert "Please choose at least one authenticaiton option" in result.output
+    assert "Please choose at least one authentication option" in result.output
