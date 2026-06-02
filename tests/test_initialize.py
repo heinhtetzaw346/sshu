@@ -19,7 +19,7 @@ def test_init_sshu_config(temp: tuple):
     default_config: dict = {
         "default_identity_key": "id_ed25519",
         "keys_dir": str(ssh_dir / "keys"),
-        "keys_scan": True
+        "key_scan": False
     }
 
     for key in default_config.keys():

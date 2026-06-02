@@ -20,7 +20,8 @@ def test_manager_add(temp: tuple, capsys, monkeypatch):
         passwd=False,
         copyid=False,
         keypair="",
-        port="2222"
+        port="2222",
+        key_scan=False
     )
     
     cfg_content = ssh_cfg.read_text()
@@ -48,7 +49,8 @@ def test_manager_add_duplicate(temp: tuple, capsys, monkeypatch):
             passwd=False,
             copyid=False,
             keypair="",
-            port="2222"
+            port="2222",
+            key_scan=False
         )
     assert exc.value.code == None # sys.exit() without arguments defaults to None
 

@@ -128,11 +128,11 @@ def test_get_sshu_config_exists(monkeypatch, tmp_path):
     
     # Create the mock config file
     config_file = tmp_path / "config.yaml"
-    config_file.write_text("keys_scan: true\ndefault_identity_key: id_rsa")
+    config_file.write_text("key_scan: true\ndefault_identity_key: id_rsa")
     monkeypatch.setattr(config_utils, "sshu_cfg_file", config_file)
     
     config = get_sshu_config()
-    assert config == {"keys_scan": True, "default_identity_key": "id_rsa"}
+    assert config == {"key_scan": True, "default_identity_key": "id_rsa"}
 
 def test_get_sshu_config_not_exists(monkeypatch, tmp_path):
     # Mock the config dir where the file doesn't exist

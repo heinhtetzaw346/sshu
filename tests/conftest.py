@@ -34,7 +34,7 @@ Port 22
     temp_sshu_cfg_content: dict = {
         "default_identity_key": "id_ed25519",
         "keys_dir": f"{str(temp_dir)}/keys",
-        "keys_scan": False
+        "key_scan": False
     }
 
     with open(temp_sshu_cfg,mode="w") as f:
