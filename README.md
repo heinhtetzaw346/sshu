@@ -59,7 +59,7 @@ curl -fsSL https://raw.githubusercontent.com/FuReAsu/sshu/refs/heads/main/instal
 
 ### Manual Installation
 
-1. Download the appropriate `.tar.gz` or `.zip` file from the [Releases page](../../releases) or GitHub Actions artifacts.
+1. Download the appropriate `.tar.gz` or `.zip` file from the [Releases page](../../releases)
 2. Extract the archive:
    ```bash
    tar -xzvf sshu-beta-v0.1.1.tar.gz
