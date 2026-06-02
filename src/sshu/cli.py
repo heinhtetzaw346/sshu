@@ -54,12 +54,11 @@ def main(
     version: bool = typer.Option(False, "--version", is_eager=True)
     ):
 
-    if ctx.invoked_subcommand is None:
-        typer.echo(ctx.get_help())
-        raise typer.Exit(code=0)
-   
     if version:
         show_version()
+        raise typer.Exit(code=0)
+    elif ctx.invoked_subcommand is None:
+        typer.echo(ctx.get_help())
         raise typer.Exit(code=0)
     if verbose == 0:
         stdout_level = logging.CRITICAL
