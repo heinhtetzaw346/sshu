@@ -13,7 +13,7 @@
 - [Features](#features)
 - [Supported Platforms](#supported-platforms)
 - [Installation](#installation)
-  - [Using the Installer Script (Beta)](#using-the-installer-script-beta)
+  - [Using the Installer Scripts](#using-the-installer-scripts)
   - [Manual Installation](#manual-installation)
 - [Usage / Command Reference](#usage--command-reference)
 - [Configuration](#configuration)
