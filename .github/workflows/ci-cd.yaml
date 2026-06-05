@@ -227,6 +227,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           files: |
             release-binaries/*
+            install/sshu_installer.sh
+            install/sshu_installer.ps1
           body: |
             Release ${{ needs.prepare.outputs.version }}
             
