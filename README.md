@@ -48,14 +48,40 @@ SSHU is OS-agnostic when installed via pip. Standalone binaries are available fo
 
 You can find all official releases on the [Releases page](../../releases). For developmental pip packages, visit [Test PyPI](https://test.pypi.org/project/sshu/).
 
-### Using the Installer Script (Beta)
+### Using the Installer Scripts
 
-> [!NOTE]
-> The installation script is currently in beta and is tailored for Debian, RedHat, and SUSE-based distributions using bash-like shells.
+You can install SSHU quickly using our automated installation scripts.
+
+**Linux / macOS**
+```bash
+curl -fsSL https://raw.githubusercontent.com/heinhtetzaw346/sshu/refs/heads/main/install/sshu_installer.sh | sh
+```
+*Note: The script automatically detects if you are running as root and selects the appropriate installation path (`/usr/local/bin` for root, `~/.local/bin` for non-root).*
+
+**Windows (PowerShell)**
+```powershell
+Invoke-RestMethod -Uri https://raw.githubusercontent.com/heinhtetzaw346/sshu/refs/heads/main/install/sshu_installer.ps1 | Invoke-Expression
+```
+*Note: Run PowerShell as Administrator for a system-wide installation, or as a normal user to install locally for your account.*
+
+### Installing from PyPI
+
+You can also install SSHU as a standard Python package. We recommend using a virtual environment (`venv`) to avoid system-wide package conflicts.
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/FuReAsu/sshu/refs/heads/main/install/linux_bash/sshu-installer.sh | sudo bash
+# Create a virtual environment
+python3 -m venv sshu-env
+
+# Activate the environment
+# On Linux/macOS:
+source sshu-env/bin/activate
+# On Windows:
+# .\sshu-env\Scripts\activate
+
+# Install SSHU
+pip install sshu
 ```
+*(Alternatively, you can use `pipx install sshu` to install it globally in an isolated environment).*
 
 ### Manual Installation
 
