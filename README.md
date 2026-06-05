@@ -1,7 +1,7 @@
 # SSHU (SSH Utility)
 
 ![Python Version](https://img.shields.io/badge/python-3.12-blue)
-![License](https://img.shields.io/badge/license-MIT-green)
+![License](https://img.shields.io/badge/license-GPL_3.0%20license-yellow)
 ![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey)
 
 **SSHU** is an interactive, command-line application designed to simplify SSH connection management. Built with Python and Typer, it eliminates the need to manually edit your `~/.ssh/config` file, allowing you to easily add, remove, list, and connect to remote hosts using simple, memorable names.
