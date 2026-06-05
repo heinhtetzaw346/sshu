@@ -14,17 +14,15 @@ function log {
         [string]$Message
     )
     switch ($Level) {
-        "success"  { Write-Host "✔️  $Message" -ForegroundColor Green  }
-        "failure"  { Write-Host "❌  $Message" -ForegroundColor Red    }
-        "progress" { Write-Host "🚀  $Message" -ForegroundColor Yellow }
+        "success"  { Write-Host "[+] $Message" -ForegroundColor Green  }
+        "failure"  { Write-Host "[-] $Message" -ForegroundColor Red    }
+        "progress" { Write-Host "[*] $Message" -ForegroundColor Yellow }
     }
 }
 
 # ── Admin detection ───────────────────────────────────────────────────────────
 
-$IsAdmin = ([Security.Principal.WindowsPrincipal]
-    [Security.Principal.WindowsIdentity]::GetCurrent()
-).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+$IsAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
 
 if ($IsAdmin) {
     $INSTALL_PATH = "C:\Program Files\sshu"
@@ -45,7 +43,7 @@ $TEMP_DIR = [System.IO.Path]::Combine([System.IO.Path]::GetTempPath(), [System.I
 New-Item -ItemType Directory -Path $TEMP_DIR | Out-Null
 
 try {
-    log progress "Downloading sshu v$SSHU_VER from $DOWNLOAD_URL"
+    log progress "Downloading sshu $SSHU_VER from $DOWNLOAD_URL"
     Invoke-WebRequest -Uri $DOWNLOAD_URL -OutFile "$TEMP_DIR\sshu.exe" -UseBasicParsing
 
     # ── Install ───────────────────────────────────────────────────────────────
