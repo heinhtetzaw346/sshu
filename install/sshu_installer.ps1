@@ -1,9 +1,9 @@
 #Requires -Version 5.1
 
 # Set sshu version
+
 $SSHU_VER = if ($env:SSHU_VER) { $env:SSHU_VER } else { "1.0.0" }
 
-# Stop on any error (equivalent of set -e)
 $ErrorActionPreference = "Stop"
 
 # ── Colors / Logging ─────────────────────────────────────────────────────────
@@ -69,7 +69,7 @@ try {
             log progress "$INSTALL_PATH is already in PATH, skipping."
         }
     } else {
-        # For system-wide installs, update machine PATH (requires admin)
+
         $SCOPE = "Machine"
         $CURRENT_PATH = [Environment]::GetEnvironmentVariable("PATH", $SCOPE)
 
@@ -85,7 +85,7 @@ try {
     log success "SSHU Version $SSHU_VER installed successfully"
 
 } finally {
-    # Cleanup temp dir (equivalent of trap ... EXIT)
+
     if (Test-Path $TEMP_DIR) {
         Remove-Item -Recurse -Force $TEMP_DIR
     }
