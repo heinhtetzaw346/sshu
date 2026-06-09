@@ -68,7 +68,7 @@ jobs:
       - name: Build binary
         run: docker run --rm -v ./bin:/dist local/sshu-build:latest
       - name: Archive binary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: sshu-${{ needs.prepare.outputs.version }}-linux-glibc
           path: bin/sshu
@@ -84,7 +84,7 @@ jobs:
       - name: Build binary
         run: docker run --rm -v ./bin:/dist local/sshu-build:latest
       - name: Archive binary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: sshu-${{ needs.prepare.outputs.version }}-linux-musl
           path: bin/sshu
@@ -108,9 +108,9 @@ jobs:
       - name: Build binary
         run: |
             $Env:PYTHONPATH = ".\src"
-            poetry run pyinstaller --name sshu --distpath .\bin -p .\src\sshu --onefile .\src\sshu\cli.py
+            poetry run pyinstaller --name sshu --distpath .\bin -p .\src\sshu --onefile --collect-submodules shellingham .\src\sshu\cli.py
       - name: Archive binary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: sshu-${{ needs.prepare.outputs.version }}-windows
           path: bin/sshu.exe
@@ -132,9 +132,9 @@ jobs:
       - name: Install with poetry
         run: poetry install
       - name: Build binary
-        run: PYTHONPATH=./src poetry run pyinstaller --name sshu --distpath ./bin -p ./src/sshu --onefile ./src/sshu/cli.py
+        run: PYTHONPATH=./src poetry run pyinstaller --name sshu --distpath ./bin -p ./src/sshu --onefile --collect-submodules shellingham ./src/sshu/cli.py
       - name: Archive binary
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: sshu-${{ needs.prepare.outputs.version }}-macos
           path: bin/sshu
@@ -159,7 +159,7 @@ jobs:
       - name: Build pip
         run: poetry build
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: pip-${{ needs.prepare.outputs.version }}
           path: dist

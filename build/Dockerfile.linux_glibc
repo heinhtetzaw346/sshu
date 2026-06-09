@@ -18,6 +18,6 @@ COPY ./src/sshu sshu
 
 ENTRYPOINT ["/venv/bin/python", "-m", "PyInstaller"]
 
-CMD ["--name", "sshu", "--distpath", "/dist", "--onefile", "sshu/cli.py"]
+CMD ["--name", "sshu", "--distpath", "/dist", "--onefile", "--collect-submodules", "shellingham", "sshu/cli.py"]
 
 VOLUME /dist

@@ -14,6 +14,6 @@ COPY ./src/sshu sshu
 
 ENTRYPOINT ["pyinstaller"]
 
-CMD ["--name", "sshu", "--distpath", "/dist", "--onefile", "sshu/cli.py"]
+CMD ["--name", "sshu", "--distpath", "/dist", "--onefile", "--collect-submodules", "shellingham", "sshu/cli.py"]
 
 VOLUME /dist
